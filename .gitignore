@@ -1,9 +1,6 @@
 web-ext-artifacts/
-Backend/__pycache__/
+__pycache__/
 Backend/networks/generator.zip
-Backend/denoising/__pycache__/
-Backend/networks/__pycache__/
-Backend/utils/__pycache__/
 Backend/manga/*
 .vs/
 
