@@ -8,7 +8,7 @@ https://user-images.githubusercontent.com/93908298/227715568-52e4c510-aff5-40f7-
 
 ## Limitations:
 - Only works with https://ww5.manganelo.tv, currently.
-- Compatible with Firefox, Chrome, Firefox Nightly Android and Kiwi (Basically Android Chrome with extension) browser.
+- Compatible with <b>Firefox, Chrome, Firefox Nightly Android and Kiwi</b> (Basically Android Chrome with extension) browser.
 - Backend server is not hosted, so self local hosting is required. (Python required) (Only works in LAN)
 
 
