@@ -98,7 +98,8 @@
                     if(imageElement.src != ''){
                         f_name = imageElement.src.rsplit('/', 1)[1].rsplit('.', 1)[0];
                         colorized_urls.forEach(url => {
-                            if(url.includes(f_name)){
+                            const cf_name = url.rsplit('/', 1)[1].rsplit('.', 1)[0];
+                            if(cf_name === f_name){
                                 imageElement.src = baseUrl + url;
                                 imageElement.dataset.src = '';
                             }
@@ -106,7 +107,8 @@
                     } else if(imageElement.dataset.src != ''){
                         f_name = imageElement.dataset.src.rsplit('/', 1)[1].rsplit('.', 1)[0];
                         colorized_urls.forEach(url => {
-                            if(url.includes(f_name)){
+                            const cf_name = url.rsplit('/', 1)[1].rsplit('.', 1)[0];
+                            if(cf_name === f_name){
                                 imageElement.src = baseUrl + url;
                                 imageElement.dataset.src = '';
                             }

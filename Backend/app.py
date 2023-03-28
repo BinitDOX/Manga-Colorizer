@@ -38,7 +38,8 @@ def colorize_images():
     print(f'[+] Got: {manga_title} >> {manga_chapter}')
     
     opener=urllib.request.build_opener()
-    opener.addheaders=[('User-Agent','Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/36.0.1941.0 Safari/537.36')]
+    opener.addheaders=[('User-Agent','Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:109.0) Gecko/20100101 Firefox/111.0'),
+        ('Accept', 'image/avif,image/webp,*/*'), ('Accept-Language', 'en-US,en;q=0.5'), ('Accept-Encoding', 'gzip, deflate, br'), ('Referer', 'https://chapmanganelo.com/')]
     urllib.request.install_opener(opener)
 
     print('[*] Downloading...')

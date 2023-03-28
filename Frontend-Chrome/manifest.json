@@ -1,12 +1,12 @@
 {
     "name": "Manga Colorizer",
-    "version": "0.1.0",
+    "version": "0.2.0",
     "description": "Bringing mangas to life",
     "permissions": ["storage", "tabs"],
-    "host_permissions": ["https://*.manganelo.tv/*"],
+    "host_permissions": ["https://*.manganelo.tv/*", "https://chapmanganelo.com/*"],
     "content_scripts": [
       {
-        "matches": ["https://*.manganelo.tv/chapter/*"],
+        "matches": ["https://*.manganelo.tv/chapter/*", "https://chapmanganelo.com/*"],
         "js": ["contentScript.js"]
       }
     ],
@@ -15,7 +15,7 @@
         "resources": [
           "assets/ext-icon.png"
         ],
-        "matches": ["https://*.manganelo.tv/*"]
+        "matches": ["https://*.manganelo.tv/*", "https://chapmanganelo.com/*"]
       }
     ],
     "action": {
