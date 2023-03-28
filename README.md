@@ -1,13 +1,17 @@
 # Manga-Colorizer
 Introducing Manga-Colorizer, a tool that brings your mangas to life!
 
-## Demo Video:
+
+## Demo Video - PC:
 https://user-images.githubusercontent.com/93908298/227715568-52e4c510-aff5-40f7-aa5d-4954c3416253.mp4
+
+## Demo Video - Android:
+https://user-images.githubusercontent.com/93908298/227804094-d7552b52-71cf-4d08-b030-ae081c57cc88.mp4
 
 
 ## Limitations:
 - Only works with https://ww5.manganelo.tv, currently.
-- Compatible with Firefox browser and Firefox Nightly Android browser. (Compatibility can easily be extended for Chrome)
+- Compatible with <b>Firefox, Chrome, Firefox Nightly Android and Kiwi</b> (Basically Android Chrome with extension) browser.
 - Backend server is not hosted, so self local hosting is required. (Python required) (Only works in LAN)
 
 
@@ -21,39 +25,71 @@ https://user-images.githubusercontent.com/93908298/227715568-52e4c510-aff5-40f7-
    - Enter PEM Pass Phrase: <code>Ireckon</code>
    - Backend should be running on localhost (https://127.0.0.1:5000) and Private IP (https://x.x.x.x:5000)
   
-## Client Usage Instructions - PC: 
+  
+## Client Usage Instructions - PC - Firefox: 
 0. Open the server URL (Ex. https://x.x.x.x:5000)
    - It will show some certificate warning, as it is self-signed.
-   - Click 'Advanced' and click 'Accept the risk and continue'.
+   - Click 'Advanced' and click 'Accept the risk and continue'. ('Proceed, unsafe' for Chrome)
    - You should now see 'Manga Colorizer is Up and Running!'
 1. Install https://addons.mozilla.org/en-US/firefox/addon/manga-colorizer/ extension on firefox.
 2. Open any manga on https://ww5.manganelo.tv/
-3. Right click the extension and select 'Always allow on...'
+3. Right click the extension and select 'Always allow on...' (No need for Chrome)
 4. Click the extension and turn on cached panels, also input the server URL in the 'API Base-URL'.
 5. Click the 'Colorize' button, that should appear next to 'Next chapter'.
 6. Wait (~20sec-1min, depends on Network and GPU) and Enjoy.
 
-## Client Usage Instructions - Android:
+
+## Client Usage Instructions - PC - Chrome: 
+0. Open the server URL (Ex. https://x.x.x.x:5000)
+   - It will show some certificate warning, as it is self-signed.
+   - Click 'Advanced' and click 'Proceed to x.x.x.x (unsafe)'.
+   - You should now see 'Manga Colorizer is Up and Running!'
+1. Goto <code>chrome://extensions/</code> webpage, turn on developer mode, and click 'Load Unpacked'.
+2. Navigate to and select Frontend-Chrome folder.
+3. Open any manga on https://ww5.manganelo.tv/
+4. Click the extension and turn on cached panels, also input the server URL in the 'API Base-URL'.
+5. Click the 'Colorize' button, that should appear next to 'Next chapter'.
+6. Wait (~20sec-1min, depends on Network and GPU) and Enjoy.
+
+
+## Client Usage Instructions - Android - Firefox Nightly:
 1. Install Firefox Nightly browser on android from google playstore.
 2. Open settings, scroll down and select 'About Firefox Nightly'.
 3. Keep Tapping on Firefox logo, until the Debug menu is enabled.
 4. Go back and select Custom Add-on collection
 5. Input <code>17834213</code> in User-ID and <code>XODalG-MC</code> in Collection name.
-6. Follow Step-0 of 'Client Usage Instructions - PC'
+6. Follow Step-0 of 'Client Usage Instructions - PC - Firefox'
 7. Open any manga on https://ww5.manganelo.tv/
 8. Tap settings menu (3 dots), select Add-ons, select the colorizer extension.
-9. Then turn on cached panels, also input the server URL in the 'API Base-URL'.
+9. Then turn on cached panels, also input the server URL in the 'API Base-URL', and go back.
 10. Click the 'Colorize' button, that should appear next to 'Next chapter'.
 11. Wait (~20sec-1min, depends on Network and GPU) and Enjoy.
-12. Unfortunately, only Step-8 has to be repeated at every chapter because of permission issues.
+12. Unfortunately, only Step-8 has to be repeated at every chapter because of permission issues, so Kiwi Browser is recommended.
 
-## Pro Tip:
+
+## Client Usage Instructions - Android - Kiwi (Chrome \w extension):
+1. Move the 'Frontend-Chrome.crx' file in the Frontend-Chrome folder to your Android device.
+2. Install Kiwi browser on android from google playstore.
+3. Open browser settings menu (3 dots), select 'Extensions', then select '+(from .zip / crx)' and browse for the 'Frontend-Chrome.crx' file.
+4. Toggle on the extension and accept the permissions.
+5. Follow Step-0 of 'Client Usage Instructions - PC - Chrome'
+6. Open any manga on https://ww5.manganelo.tv/
+7. Tap settings menu, scroll down, select the colorizer extension.
+8. Then turn on cached panels, also input the server URL in the 'API Base-URL', and go back.
+9. Click the 'Colorize' button, that should appear next to 'Next chapter'.
+10. Wait (~20sec-1min, depends on Network and GPU) and Enjoy.
+
+
+## Pro Tips:
+- Install the uBlock Origin extension.
 - Before reading a chapter, navigate to the next chapter and initiate the colorization. Then, navigate back to the current chapter immediately. The next time you visit and colorize the next chapter, it will take only 1 to 5 seconds, given that the panel caching is turned on. This means you can merge the colorization time into your reading time.
+
 
 ## Troubleshoot:
 - If there is an error, make sure you can always access the server URL from Client device. (Refer Step-0)
 - If there is an error, make sure you entered correct server URL with port number, in 'API Base-URL' of extension settings.
 - If the 'Colorize' button does not appear, click the extension once.
+
 
 ## Credits:
 - https://github.com/qweasdd/manga-colorization-v2 for AI Model and Weights.
