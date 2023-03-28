@@ -10,7 +10,7 @@ https://user-images.githubusercontent.com/93908298/227804094-d7552b52-71cf-4d08-
 
 
 ## Limitations:
-- Only works with https://ww5.manganelo.tv, currently.
+- Works with https://ww5.manganelo.tv and https://chapmanganelo.com/.
 - Compatible with <b>Firefox, Chrome, Firefox Nightly Android and Kiwi</b> (Basically Android Chrome with extension) browser.
 - Backend server is not hosted, so self local hosting is required. (Python required) (Only works in LAN)
 
@@ -32,7 +32,7 @@ https://user-images.githubusercontent.com/93908298/227804094-d7552b52-71cf-4d08-
    - Click 'Advanced' and click 'Accept the risk and continue'. ('Proceed, unsafe' for Chrome)
    - You should now see 'Manga Colorizer is Up and Running!'
 1. Install https://addons.mozilla.org/en-US/firefox/addon/manga-colorizer/ extension on firefox.
-2. Open any manga on https://ww5.manganelo.tv/
+2. Open any manga on https://ww5.manganelo.tv/ or https://chapmanganelo.com/
 3. Right click the extension and select 'Always allow on...' (No need for Chrome)
 4. Click the extension and turn on cached panels, also input the server URL in the 'API Base-URL'.
 5. Click the 'Colorize' button, that should appear next to 'Next chapter'.
@@ -46,7 +46,7 @@ https://user-images.githubusercontent.com/93908298/227804094-d7552b52-71cf-4d08-
    - You should now see 'Manga Colorizer is Up and Running!'
 1. Goto <code>chrome://extensions/</code> webpage, turn on developer mode, and click 'Load Unpacked'.
 2. Navigate to and select Frontend-Chrome folder.
-3. Open any manga on https://ww5.manganelo.tv/
+3. Open any manga on https://ww5.manganelo.tv/ or https://chapmanganelo.com/
 4. Click the extension and turn on cached panels, also input the server URL in the 'API Base-URL'.
 5. Click the 'Colorize' button, that should appear next to 'Next chapter'.
 6. Wait (~20sec-1min, depends on Network and GPU) and Enjoy.
@@ -59,7 +59,7 @@ https://user-images.githubusercontent.com/93908298/227804094-d7552b52-71cf-4d08-
 4. Go back and select Custom Add-on collection
 5. Input <code>17834213</code> in User-ID and <code>XODalG-MC</code> in Collection name.
 6. Follow Step-0 of 'Client Usage Instructions - PC - Firefox'
-7. Open any manga on https://ww5.manganelo.tv/
+7. Open any manga on https://ww5.manganelo.tv/ or https://chapmanganelo.com/
 8. Tap settings menu (3 dots), select Add-ons, select the colorizer extension.
 9. Then turn on cached panels, also input the server URL in the 'API Base-URL', and go back.
 10. Click the 'Colorize' button, that should appear next to 'Next chapter'.
@@ -73,7 +73,7 @@ https://user-images.githubusercontent.com/93908298/227804094-d7552b52-71cf-4d08-
 3. Open browser settings menu (3 dots), select 'Extensions', then select '+(from .zip / crx)' and browse for the 'Frontend-Chrome.crx' file.
 4. Toggle on the extension and accept the permissions.
 5. Follow Step-0 of 'Client Usage Instructions - PC - Chrome'
-6. Open any manga on https://ww5.manganelo.tv/
+6. Open any manga on https://ww5.manganelo.tv/ or https://chapmanganelo.com/
 7. Tap settings menu, scroll down, select the colorizer extension.
 8. Then turn on cached panels, also input the server URL in the 'API Base-URL', and go back.
 9. Click the 'Colorize' button, that should appear next to 'Next chapter'.
