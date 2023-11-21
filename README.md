@@ -12,10 +12,27 @@ https://user-images.githubusercontent.com/93908298/227804094-d7552b52-71cf-4d08-
 ## Limitations:
 - Works with https://ww5.manganelo.tv and https://chapmanganelo.com/.
 - Compatible with <b>Firefox, Chrome, Firefox Nightly Android and Kiwi</b> (Basically Android Chrome with extension) browser.
-- Backend server is not hosted, so self local hosting is required. (Python required) (Only works in LAN)
+- <s>Backend server is not hosted, so self local hosting is required. (Python required) (Only works in LAN)</s>
 
 
-## Server Usage Instructions: 
+## Server Usage Instructions (KAGGLE HOSTING, NEW)(21/11/23): 
+1. Make a <a href="https://www.kaggle.com/">kaggle</a> account and verify using phone to get ~30hrs of weekly GPU.
+2. Make an <a href="https://ngrok.com/">ngrok</a> account and get your auth token from <a href="https://dashboard.ngrok.com/get-started/your-authtoken">here</a>
+3. Go to <a href="https://www.kaggle.com/code/yeeandres/manga-colorizer-server">this</a> notebook and click 'Copy & Edit'
+4. Set the accelerator as GPU P100 under notebook options if not already selected.
+5. Replace the your_ngrok_auth_token in '!ngrok config add-authtoken your_ngrok_auth_token' in the code with the auth-token in Step 3.
+6. Next choose 'Run All' from the menu to run the notebook.
+7. In a few minutes you should see some output from the last running line (!ngrok http 5000) with some urls.
+8. Click on the one which looks something like https://314-1342-142-43.ngrok-free.app.
+9. Alternatively, visit <a href="https://dashboard.ngrok.com/tunnels/agents">here</a> to get the running sessions.
+10. On the tab that opens, click visit site.
+11. You should see 'Manga Colorizer is Up and Running!'
+12. Now you can follow any of the 'Client Usage Instructions' below, including step 0, but with this API URL
+13. You may also now click 'Save Version' on the notebook, then 'Save and Run All (Compile)' to keep the notebook running (it will re-run) even after you turn off your system.
+14. After a few minutes, visit <a href="https://dashboard.ngrok.com/tunnels/agents">here</a> to get the running sessions and get the new API URL and use that for the client.
+    
+
+## Server Usage Instructions (SELF HOSTING, OLD): 
 1. Clone or download the repository as .zip and extract. 
 2. Download the <a href="https://drive.google.com/file/d/1qmxUEKADkEM4iYLp1fpPLLKnfZ6tcF-t/view?usp=sharing" rel="nofollow">Generator</a> weights and move it to <code>Backend/networks</code> folder.
 3. If you do not have a GPU, edit app.py and set <code>self.gpu = False</code> (~Line 75)
