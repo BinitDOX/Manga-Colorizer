@@ -33,6 +33,7 @@ https://user-images.githubusercontent.com/93908298/227804094-d7552b52-71cf-4d08-
     
 
 ## Server Usage Instructions (SELF HOSTING, OLD): 
+0. If you are following this method, please refer <a href="https://ngrok.com/](https://github.com/BinitDOX/Manga-Colorizer/issues/6">here</a> for known issues.
 1. Clone or download the repository as .zip and extract. 
 2. Download the <a href="https://drive.google.com/file/d/1qmxUEKADkEM4iYLp1fpPLLKnfZ6tcF-t/view?usp=sharing" rel="nofollow">Generator</a> weights and move it to <code>Backend/networks</code> folder.
 3. If you do not have a GPU, edit app.py and set <code>self.gpu = False</code> (~Line 75)
