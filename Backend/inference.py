@@ -42,7 +42,10 @@ def colorize_images(target_path, colorizator, args):
 
         print('[+] C:', file_path)
         save_path = os.path.join(target_path, image_name)
-        colorize_single_image(file_path, save_path, colorizator, args)
+        try:
+            colorize_single_image(file_path, save_path, colorizator, args)
+        except Exception as ex:
+            print("Could not colorize: ", file_path, ex)
     
 def parse_args():
     parser = argparse.ArgumentParser()
