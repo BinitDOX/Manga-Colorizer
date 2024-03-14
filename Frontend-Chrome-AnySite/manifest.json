@@ -1,0 +1,20 @@
+{
+  "name": "Any Manga Colorizer",
+  "version": "0.3.0",
+  "description": "Add color to black-and-white manga",
+  "permissions": ["contextMenus", "activeTab", "scripting", "storage", "tabs"],
+  "action": {
+    "default_icon": {
+      "16": "assets/ext-icon.png",
+      "24": "assets/ext-icon.png",
+      "32": "assets/ext-icon.png"
+    },
+    "default_title": "Manga Colorizer",
+    "default_popup": "popup.html"
+  },
+  "background": {
+    "service_worker": "background.js",
+    "type": "module"
+  },
+  "manifest_version": 3
+}
