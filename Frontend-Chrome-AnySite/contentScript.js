@@ -15,71 +15,65 @@
             if (result.cachedPanels !== undefined) {
                 useCachedPanels = result.cachedPanels;
             }
-            console.log("MC content: Get apiURL:", apiURL);
-            console.log("MC content: Get cachedPanels:", useCachedPanels);
+            // console.log("MC content: Get apiURL:", apiURL);
+            // console.log("MC content: Get cachedPanels:", useCachedPanels);
 
             console.log('MC: Scanning images...')
+            document.querySelectorAll("img:not([colorized])").forEach(img => {
+                if (img.width > 500 && img.height > 500) {
+                    // console.log("img: ", img.src);
+                    // console.log("img attributes: ", img.attributes);
+                    var imgCanvas = document.createElement("canvas"),
+                    imgContext = imgCanvas.getContext("2d");
 
-            const imgSrcList = [];
-            Array.from(document.images).forEach(img => {
-                if (img.width > 500 && img.height > 500)
-                    if(img.src != '')
-                        imgSrcList.push(img.src)
-                    else if(img.dataset.src != '')
-                        imgSrcList.push(img.dataset.src)
-                    else
-                        imgSrcList.push('error')
+                    try {
+                        // Make sure canvas is as big as the picture
+                        imgCanvas.width = img.width;
+                        imgCanvas.height = img.height;
+
+                        // Draw image into canvas element
+                        imgContext.drawImage(img, 0, 0, img.width, img.height);
+                        // Save image as a data URL
+                        imgName = (img.src || img.dataset.src).rsplit('/', 1)[1];
+                        console.log('imgName', imgName)
+
+                        imgData = imgCanvas.toDataURL("image/png");
+
+                        const postData = {
+                            mangaTitle: mangaTitle,
+                            mangaChapter: mangaChapter,
+                            useCachedPanels: useCachedPanels,
+                            imgName: imgName,
+                            imgData: imgData
+                        };
+                        // console.log('postData', postData)
+
+                        const options = {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify(postData)
+                        };
+                        let curl = apiURL + '/colorize-image-data';
+                        console.log("MC: Sending to:", curl);
+                        fetch(curl, options)
+                            .then(response => response.json())
+                            .then(data => {
+                                console.log('MC: Setting Data');
+                                img.src = data.colorImgData;
+                                img.dataset.src = '';
+                                img.classList.add("colorized");
+                                console.log('MC: COLORIZED!');
+                            })
+                            .catch(error => {
+                                console.error('MC: ' + error);
+                            });
+                    } catch(e1) {
+                        console.log('Could not get data URL', e1)
+                    }
+                }
             });
-
-            const data = {
-                mangaTitle: mangaTitle,
-                mangaChapter: mangaChapter,
-                imgSrcList: imgSrcList,
-                useCachedPanels: useCachedPanels
-            };
-
-            const options = {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(data)
-            };
-            console.log("MC: Sending data:", data);
-            let curl = apiURL + '/colorize-images';
-            console.log("MC: Sending to:", curl);
-            fetch(curl, options)
-                .then(response => response.json())
-                .then(data => {
-                    console.log('MC: Setting Panels...');
-                    colorized_urls = data['colorized_urls']
-                    Array.from(document.images).forEach(img => {
-                    if (img.width > 500 && img.height > 500)
-                        if(img.src != ''){
-                            f_name = img.src.rsplit('/', 1)[1].rsplit('.', 1)[0];
-                            colorized_urls.forEach(url => {
-                                const cf_name = url.rsplit('/', 1)[1].rsplit('.', 1)[0];
-                                if(cf_name === f_name){
-                                    img.src = apiURL + url;
-                                    img.dataset.src = '';
-                                }
-                            });
-                        } else if(img.dataset.src != ''){
-                            f_name = img.dataset.src.rsplit('/', 1)[1].rsplit('.', 1)[0];
-                            colorized_urls.forEach(url => {
-                                const cf_name = url.rsplit('/', 1)[1].rsplit('.', 1)[0];
-                                if(cf_name === f_name){
-                                    img.src = apiURL + url;
-                                    img.dataset.src = '';
-                                }
-                            });
-                        }
-                    });
-                    console.log('MC: COLORIZED!');
-                })
-                .catch(error => {
-                    console.error('MC: ' + error);
-                });
         });
     }
 
