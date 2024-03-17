@@ -34,10 +34,10 @@ def colorize_image_data():
     img_name = req_json['imgName']
 
     img_metadata, img_data = req_json['imgData'].split(',', 1)
-    if img_name.find('.') < 0:
-        img_ext = img_metadata.split('/', 1)[1].split(';', 1)[0]
-        if len(img_ext) > 0:
-            img_name += '.' + img_ext
+    # if img_name.find('.') < 0:
+    img_ext = img_metadata.split('/', 1)[1].split(';', 1)[0]
+    if len(img_ext) > 0:
+        img_name += '.' + img_ext
 
     print(f'[+] Requested: {manga_title} / {manga_chapter} / {img_name} ({img_metadata})')
 
