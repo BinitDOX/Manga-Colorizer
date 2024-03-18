@@ -24,7 +24,7 @@
         if (event) {
             alert('imgLoaded', img, apiURL, useCachedPanels, event, "colorizing...");
         }
-        if (apiURL && !img.classList.contains(COLOREDCLASS)) try {
+        if (apiURL && !img.classList?.contains(COLOREDCLASS)) try {
             imgName = (img.src || img.dataset.src).rsplit('/', 1)[1];
             console.log('colorize', imgName)
             img.classList.add(COLOREDCLASS); // Add early so we don't try again while fetching
