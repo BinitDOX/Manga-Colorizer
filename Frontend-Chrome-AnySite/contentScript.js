@@ -90,4 +90,7 @@
     }
 
     colorizeMangaEventHandler();
+
+    const observer = new MutationObserver(colorizeMangaEventHandler);
+    observer.observe(document.querySelector("body"), { subtree: true, childList: true });
 })();
