@@ -18,7 +18,12 @@ def index():
 def colorize_image_data():
     req_json = request.get_json()
     img_data = req_json['imgData']
-    # size = req_json['size'] or 576
+    try:    
+        img_size = closestDivisibleBy32(req_json['imgWidth'])
+    except KeyError: 
+        img_size = 576
+
+    print("size", img_size)
     class Configuration:
         def __init__(self):
             self.generator = 'networks/generator.zip'
@@ -26,7 +31,7 @@ def colorize_image_data():
             self.gpu = True
             self.denoiser = True
             self.denoiser_sigma = 25
-            self.size = 576
+            self.size = img_size
             self.use_cached = False
 
     args = Configuration()
@@ -61,6 +66,20 @@ def img_to_base64_str(img):
     buffered.seek(0)
     img_byte = buffered.getvalue()
     return "data:image/png;base64," + base64.b64encode(img_byte).decode('utf-8')
+
+# Function to find the number closest 
+# to n and divisible by 32
+def closestDivisibleBy32(n):
+    divby = 32
+    q = int(n / divby)
+    n1 = divby * q
+    if((n * divby) > 0):
+        n2 = (divby * (q + 1)) 
+    else:
+        n2 = (divby * (q - 1))
+    if (abs(n - n1) < abs(n - n2)) :
+        return n1
+    return n2
 
 if __name__ == '__main__':
     context = ('server.crt', 'server.key')

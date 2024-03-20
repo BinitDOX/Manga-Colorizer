@@ -48,6 +48,7 @@
                     mangaChapter: mangaChapter,
                     useCachedPanels: useCachedPanels,
                     imgName: imgName,
+                    imgWidth: img.width,
                     imgData: imgData
                 };
 
