@@ -20,6 +20,24 @@
         return false;
     }
 
+    async function fetchColorizedImg(url, options, img, imgName) {
+        console.log("MC: fetching:", url, imgName);
+        return fetch(url, options)
+            .then(function(response) {
+                if(!response.ok)
+                    throw response.text();
+                else
+                    return response.json()})
+            .then(json => {
+                img.src = json.colorImgData;
+                img.dataset.src = '';
+                console.log('MC: Colorized', imgName);
+            })
+            .catch(error => {
+                console.error('MC: ' + error);
+            });
+    }
+
     const colorizeImg = (img, apiURL, event) => {
         if (event) {
             alert('imgLoaded', img, apiURL, useCachedPanels, event, "colorizing...");
@@ -51,22 +69,7 @@
                     },
                     body: JSON.stringify(postData)
                 };
-                let curl = apiURL + '/colorize-image-data';
-                console.log("MC: Sending to:", curl, imgName);
-                fetch(curl, options)
-                    .then(function(response) {
-                        if(!response.ok)
-                            throw response.text();
-                        else
-                            return response.json()})
-                    .then(json => {
-                        img.src = json.colorImgData;
-                        img.dataset.src = '';
-                        console.log('MC: Colorized', imgName);
-                    })
-                    .catch(error => {
-                        console.error('MC: ' + error);
-                    });
+                fetchColorizedImg(apiURL + '/colorize-image-data', options, img, imgName);
             }
         } catch(e1) {
             console.log('MC: colorizeImg error', e1)
