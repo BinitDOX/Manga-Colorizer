@@ -22,7 +22,7 @@ checkboxInput.addEventListener("change", () => {
 runButton.addEventListener("click",() => {    
   chrome.tabs.query({currentWindow: true, active: true}, (tabs) => {
     const tab = tabs[0];
-    if (tab) {
+    if (tab?.url?.startsWith("http")) {
       console.log("Clicked run on tab ", tab);
         chrome.scripting.executeScript({
           target: {tabId: tab.id, allFrames: true},
