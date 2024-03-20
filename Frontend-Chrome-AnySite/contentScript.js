@@ -20,13 +20,12 @@
         return false;
     }
 
-    const colorizeImg = (img, apiURL, useCachedPanels, event) => {
+    const colorizeImg = (img, apiURL, event) => {
         if (event) {
             alert('imgLoaded', img, apiURL, useCachedPanels, event, "colorizing...");
         }
         if (apiURL && !img.classList?.contains(COLOREDCLASS)) try {
             imgName = (img.src || img.dataset.src).rsplit('/', 1)[1];
-            console.log('colorize', imgName)
             img.classList.add(COLOREDCLASS); // Add early so we don't try again while fetching
 
             const imgCanvas = document.createElement("canvas");
@@ -37,19 +36,12 @@
             imgContext.drawImage(img, 0, 0, img.width, img.height);
 
             if (isColoredContext(imgContext)) {
-                console.log('already colored');
+                console.log('MC: already colored', imgName);
             } else {
-                const imgData = imgCanvas.toDataURL("image/png");
-                const mangaTitle = document.location.hostname;
-                const mangaChapter = document.location.pathname?.slice(1).replace(/\//g, '_');
-
                 const postData = {
-                    mangaTitle: mangaTitle,
-                    mangaChapter: mangaChapter,
-                    useCachedPanels: useCachedPanels,
                     imgName: imgName,
                     imgWidth: img.width,
-                    imgData: imgData
+                    imgData: imgCanvas.toDataURL("image/png")
                 };
 
                 const options = {
@@ -60,43 +52,41 @@
                     body: JSON.stringify(postData)
                 };
                 let curl = apiURL + '/colorize-image-data';
-                console.log("MC: Sending to:", curl);
+                console.log("MC: Sending to:", curl, imgName);
                 fetch(curl, options)
-                    .then(response => response.json())
-                    .then(data => {
-                        console.log('MC: Setting Data');
-                        img.src = data.colorImgData;
+                    .then(function(response) {
+                        if(!response.ok)
+                            throw response.text();
+                        else
+                            return response.json()})
+                    .then(json => {
+                        img.src = json.colorImgData;
                         img.dataset.src = '';
-                        console.log('MC: COLORIZED!');
+                        console.log('MC: Colorized', imgName);
                     })
                     .catch(error => {
                         console.error('MC: ' + error);
                     });
             }
         } catch(e1) {
-            console.log('Could not get data URL', e1)
+            console.log('MC: colorizeImg error', e1)
         }
-
     }
 
     const colorizeMangaEventHandler = () => {
-        chrome.storage.local.get(["apiURL", "cachedPanels"], (result) => {
-            console.log("MC content: storage.local.get result:", result);
+        chrome.storage.local.get(["apiURL"], (result) => {
+            // console.log("MC content: storage.local.get result:", result);
             const apiURL = result.apiURL;
             if (apiURL) {
-                var useCachedPanels = true;
-                if (result.cachedPanels !== undefined) {
-                    useCachedPanels = result.cachedPanels;
-                }
                 console.log('MC: Scanning images...')
                 document.querySelectorAll('img:not(.' + COLOREDCLASS + ')').forEach(img => {
                     if (img.width < 500 || img.height < 500) {
                         // skip small images
                     } else if (!img.complete) { // try again when this image loads
                         console.log('image not complete, adding EventListener------------------------------------------');
-                        img.addEventListener('load', colorizeImg.bind(img, apiURL, useCachedPanels));
+                        img.addEventListener('load', colorizeImg.bind(img, apiURL));
                     } else {
-                        colorizeImg(img, apiURL, useCachedPanels, null);
+                        colorizeImg(img, apiURL, null);
                     }
                 });
             }
