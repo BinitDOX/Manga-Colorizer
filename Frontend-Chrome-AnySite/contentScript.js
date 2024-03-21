@@ -1,5 +1,7 @@
 (() => {
     const COLOREDCLASS = "mangacolor"; // class applied to img if already colored or coloring requested
+    var activeFetches = 0;
+    var maxActiveFetches = 2;
 
     String.prototype.rsplit = function(sep, maxsplit) {
         const split = this.split(sep);
@@ -44,7 +46,6 @@
         }
         if (apiURL && !img.classList?.contains(COLOREDCLASS)) try {
             imgName = (img.src || img.dataset.src).rsplit('/', 1)[1];
-            img.classList.add(COLOREDCLASS); // Add early so we don't try again while fetching
 
             const imgCanvas = document.createElement("canvas");
             imgCanvas.width = img.width;
@@ -54,8 +55,11 @@
             imgContext.drawImage(img, 0, 0, img.width, img.height);
 
             if (isColoredContext(imgContext)) {
+                img.classList.add(COLOREDCLASS); // Add early so we don't try again while fetching
                 console.log('MC: already colored', imgName);
-            } else {
+            } else if (activeFetches < maxActiveFetches) {
+                activeFetches += 1;
+                img.classList.add(COLOREDCLASS); // Add early so we don't try again while fetching
                 const postData = {
                     imgName: imgName,
                     imgWidth: img.width,
@@ -69,7 +73,12 @@
                     },
                     body: JSON.stringify(postData)
                 };
-                fetchColorizedImg(apiURL + '/colorize-image-data', options, img, imgName);
+                //activeFetches.append(
+                fetchColorizedImg(apiURL + '/colorize-image-data', options, img, imgName)
+                    .then(() => {
+                        activeFetches -= 1;
+                        colorizeMangaEventHandler();
+                    });
             }
         } catch(e1) {
             console.log('MC: colorizeImg error', e1)
@@ -77,23 +86,30 @@
     }
 
     const colorizeMangaEventHandler = () => {
-        chrome.storage.local.get(["apiURL"], (result) => {
-            // console.log("MC content: storage.local.get result:", result);
-            const apiURL = result.apiURL;
-            if (apiURL) {
-                console.log('MC: Scanning images...')
-                document.querySelectorAll('img:not(.' + COLOREDCLASS + ')').forEach(img => {
-                    if (img.width < 500 || img.height < 500) {
-                        // skip small images
-                    } else if (!img.complete) { // try again when this image loads
-                        console.log('image not complete, adding EventListener------------------------------------------');
-                        img.addEventListener('load', colorizeImg.bind(img, apiURL));
-                    } else {
-                        colorizeImg(img, apiURL, null);
-                    }
-                });
+        try {
+            chrome.storage.local.get(["apiURL"], (result) => {
+                // console.log("MC content: storage.local.get result:", result);
+                const apiURL = result.apiURL;
+                if (apiURL) {
+                    console.log('MC: Scanning images...')
+                    document.querySelectorAll('img:not(.' + COLOREDCLASS + ')').forEach(img => {
+                        if (img.width < 500 || img.height < 500) {
+                            // skip small images
+                        } else if (!img.complete) { // try again when this image loads
+                            console.log('image not complete, adding EventListener------------------------------------------');
+                            img.addEventListener('load', colorizeImg.bind(img, apiURL));
+                        } else {
+                            colorizeImg(img, apiURL, null);
+                        }
+                    });
+                }
+            });
+        } catch (err) {
+            if (err.toString().includes("Extension context invalidated")) {
+                console.log("Extension reloaded, stopping old version");
+                observer?.disconnect();
             }
-        });
+        }
     }
 
     colorizeMangaEventHandler();
