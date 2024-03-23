@@ -45,40 +45,41 @@
             alert('imgLoaded', img, apiURL, useCachedPanels, event, "colorizing...");
         }
         if (apiURL && !img.classList?.contains(COLOREDCLASS)) try {
-            imgName = (img.src || img.dataset.src).rsplit('/', 1)[1];
+            if (!img.complete) throw ('image not complete');
+            imgName = (img.src || img.dataset?.src || '').rsplit('/', 1)[1];
+            if (imgName) {
+                const imgCanvas = document.createElement("canvas");
+                imgCanvas.width = img.width;
+                imgCanvas.height = img.height;
+        
+                const imgContext = imgCanvas.getContext("2d", { willReadFrequently: true });
+                imgContext.drawImage(img, 0, 0, img.width, img.height);
 
-            const imgCanvas = document.createElement("canvas");
-            imgCanvas.width = img.width;
-            imgCanvas.height = img.height;
-    
-            const imgContext = imgCanvas.getContext("2d", { willReadFrequently: true });
-            imgContext.drawImage(img, 0, 0, img.width, img.height);
+                if (isColoredContext(imgContext)) {
+                    img.classList.add(COLOREDCLASS); // Add early so we don't try again while fetching
+                    console.log('MC: already colored', imgName);
+                } else if (activeFetches < maxActiveFetches) {
+                    activeFetches += 1;
+                    img.classList.add(COLOREDCLASS); // Add early so we don't try again while fetching
+                    const postData = {
+                        imgName: imgName,
+                        imgWidth: img.width,
+                        imgData: imgCanvas.toDataURL("image/png")
+                    };
 
-            if (isColoredContext(imgContext)) {
-                img.classList.add(COLOREDCLASS); // Add early so we don't try again while fetching
-                console.log('MC: already colored', imgName);
-            } else if (activeFetches < maxActiveFetches) {
-                activeFetches += 1;
-                img.classList.add(COLOREDCLASS); // Add early so we don't try again while fetching
-                const postData = {
-                    imgName: imgName,
-                    imgWidth: img.width,
-                    imgData: imgCanvas.toDataURL("image/png")
-                };
-
-                const options = {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(postData)
-                };
-                //activeFetches.append(
-                fetchColorizedImg(apiURL + '/colorize-image-data', options, img, imgName)
-                    .then(() => {
-                        activeFetches -= 1;
-                        colorizeMangaEventHandler();
-                    });
+                    const options = {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(postData)
+                    };
+                    fetchColorizedImg(apiURL + '/colorize-image-data', options, img, imgName)
+                        .then(() => {
+                            activeFetches -= 1;
+                            colorizeMangaEventHandler();
+                        });
+                }
             }
         } catch(e1) {
             console.log('MC: colorizeImg error', e1)
@@ -106,8 +107,10 @@
             });
         } catch (err) {
             if (err.toString().includes("Extension context invalidated")) {
-                console.log("Extension reloaded, stopping old version");
+                console.log("MC: Extension reloaded, stopping old version");
                 observer?.disconnect();
+            } else {
+                console.error("MC:", err);
             }
         }
     }
