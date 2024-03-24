@@ -40,46 +40,68 @@
             });
     }
 
+    const canvasContextFromImg = (img) => {
+        const imgCanvas = document.createElement("canvas");
+        imgCanvas.width = img.width;
+        imgCanvas.height = img.height;
+
+        const imgContext = imgCanvas.getContext("2d", { willReadFrequently: true });
+        imgContext.drawImage(img, 0, 0, img.width, img.height);
+        return imgContext
+    }
+
+    const setColoredOrFetch = (img, apiURL, imgContext) => {
+        var canSendData = true;
+        try {
+            if (isColoredContext(imgContext)) {
+                img.classList.add(COLOREDCLASS);
+                console.log('MC: already colored', imgName);
+                return
+            }
+        } catch(eIsColor) {
+            canSendData = false
+            if (!eIsColor.message.startsWith("Failed to execute 'getImageData'")) {
+                console.log('MC: isColoredContext error', eIsColor)
+            }
+        }
+
+        if (activeFetches < maxActiveFetches) {
+            activeFetches += 1;
+            img.classList.add(COLOREDCLASS); // Add early so we don't try again while fetching
+            const postData = {
+                imgName: imgName,
+                imgWidth: img.width
+            }
+            if (canSendData)
+                postData.imgData = imgContext.canvas.toDataURL("image/png");
+            else
+                postData.imgURL = img.src || img.dataset?.src;
+
+            const options = {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(postData)
+            };
+            fetchColorizedImg(apiURL + '/colorize-image-data', options, img, imgName)
+                .then(() => {
+                    activeFetches -= 1;
+                    colorizeMangaEventHandler();
+                });
+        }
+    }
+
     const colorizeImg = (img, apiURL, event) => {
         if (event) {
-            alert('imgLoaded', img, apiURL, useCachedPanels, event, "colorizing...");
+            alert('colorizeImg called with event', img, apiURL, event, "colorizing...");
         }
         if (apiURL && !img.classList?.contains(COLOREDCLASS)) try {
             if (!img.complete) throw ('image not complete');
             imgName = (img.src || img.dataset?.src || '').rsplit('/', 1)[1];
             if (imgName) {
-                const imgCanvas = document.createElement("canvas");
-                imgCanvas.width = img.width;
-                imgCanvas.height = img.height;
-        
-                const imgContext = imgCanvas.getContext("2d", { willReadFrequently: true });
-                imgContext.drawImage(img, 0, 0, img.width, img.height);
-
-                if (isColoredContext(imgContext)) {
-                    img.classList.add(COLOREDCLASS); // Add early so we don't try again while fetching
-                    console.log('MC: already colored', imgName);
-                } else if (activeFetches < maxActiveFetches) {
-                    activeFetches += 1;
-                    img.classList.add(COLOREDCLASS); // Add early so we don't try again while fetching
-                    const postData = {
-                        imgName: imgName,
-                        imgWidth: img.width,
-                        imgData: imgCanvas.toDataURL("image/png")
-                    };
-
-                    const options = {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify(postData)
-                    };
-                    fetchColorizedImg(apiURL + '/colorize-image-data', options, img, imgName)
-                        .then(() => {
-                            activeFetches -= 1;
-                            colorizeMangaEventHandler();
-                        });
-                }
+                imgContext = canvasContextFromImg(img);
+                setColoredOrFetch(img, apiURL, imgContext);
             }
         } catch(e1) {
             console.log('MC: colorizeImg error', e1)
@@ -89,7 +111,6 @@
     const colorizeMangaEventHandler = () => {
         try {
             chrome.storage.local.get(["apiURL"], (result) => {
-                // console.log("MC content: storage.local.get result:", result);
                 const apiURL = result.apiURL;
                 if (apiURL) {
                     console.log('MC: Scanning images...')
