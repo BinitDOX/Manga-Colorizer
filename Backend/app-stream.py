@@ -1,5 +1,5 @@
 from os import error
-from flask import Flask, request, send_from_directory, url_for, jsonify
+from flask import Flask, request, send_from_directory, url_for, jsonify, abort
 from flask_cors import CORS
 
 import matplotlib.pyplot as plt
@@ -77,8 +77,10 @@ def retrieve_image_binary(orig_req, url):
         return urllib.request.urlopen(req).read()
     except urllib.error.URLError as e:
         print("URLError", e.reason)
+        abort(e.code)
     except error as e2:
         print("Retrieve error", e2)
+    return False        
 
 def colorize_image(image, colorizer, args):
     colorizer.set_image(image, args.size, args.denoiser, args.denoiser_sigma)
