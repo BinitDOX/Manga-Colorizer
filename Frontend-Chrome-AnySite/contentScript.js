@@ -1,25 +1,30 @@
 (() => {
     const COLOREDCLASS = "mangacolor"; // class applied to img if already colored or coloring requested
     var activeFetches = 0;
-    var maxActiveFetches = 2;
+    var maxActiveFetches = 1;
+    var maxImgWidth = 992;
+    var minDistFromGray = 30;
 
     String.prototype.rsplit = function(sep, maxsplit) {
         const split = this.split(sep);
         return maxsplit ? [ split.slice(0, -maxsplit).join(sep) ].concat(split.slice(-maxsplit)) : split;
     }
 
-    const isColoredContext = (ctx) => {
+    const maxDistFromGray = (ctx) => {
         const imageData = ctx.getImageData(0, 0, ctx.canvas.width, ctx.canvas.height);
+        var maxDist = 0;
         for (let i = 0; i < imageData.data.length; i += 4) {
             const red = imageData.data[i];
             const green = imageData.data[i + 1];
             const blue = imageData.data[i + 2];
-            // red == blue == green is a perfect gray, but also count values within 2 as gray
-            if (red - green > 2 || red - blue > 2 || blue - red > 2 || green - red > 2) {
-                return true;
-            }
+            maxDist = Math.max(Math.abs(red-blue), Math.abs(red-green), Math.abs(blue-green), maxDist)
         }
-        return false;
+        console.log('maxDistFromGray', maxDist)
+        return maxDist;
+    }
+
+    const isColoredContext = (ctx) => {
+        return maxDistFromGray(ctx) >= minDistFromGray;
     }
 
     async function fetchColorizedImg(url, options, img, imgName) {
@@ -35,9 +40,9 @@
                 img.dataset.src = '';
                 console.log('MC: Colorized', imgName);
             })
-            .catch(error => {
-                console.error('MC: ' + error);
-            });
+            // .catch(error => {
+            //     console.error('MC: caught fetchColorizedImg error', error);
+            // });
     }
 
     const canvasContextFromImg = (img) => {
@@ -62,6 +67,8 @@
             canSendData = false
             if (!eIsColor.message.startsWith("Failed to execute 'getImageData'")) {
                 console.log('MC: isColoredContext error', eIsColor)
+            } else {
+                console.log('MC: isColoredContext: Failed to execute getImageData')
             }
         }
 
@@ -70,7 +77,7 @@
             img.classList.add(COLOREDCLASS); // Add early so we don't try again while fetching
             const postData = {
                 imgName: imgName,
-                imgWidth: img.width
+                imgWidth: Math.min(img.width, maxImgWidth)
             }
             if (canSendData)
                 postData.imgData = imgContext.canvas.toDataURL("image/png");
