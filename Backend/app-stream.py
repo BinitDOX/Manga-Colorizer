@@ -7,7 +7,7 @@ import matplotlib.image as mpimg
 import base64, io
 import urllib.request, urllib.error
 
-from colorizator import MangaColorizator
+from colorizator import MangaColorizator, distance_from_grayscale
 
 app = Flask(__name__)
 CORS(app)
@@ -20,15 +20,16 @@ def index():
 def colorize_image_data():
     img_format = 'PNG'
     req_json = request.get_json()
-    try:
-        img_size = closestDivisibleBy32(req_json['imgWidth'])
-    except KeyError: 
+    img_size = req_json.get('imgWidth')
+    if (img_size > 0):
+        img_size = closestDivisibleBy32(img_size)
+    else:
         img_size = 576
-    print("size", img_size)
     img_data = req_json.get('imgData')
     img_url = req_json.get('imgURL')
     if (img_data):
         img_metadata, img_data64 = img_data.split(',', 1)
+        # print("img_metadata", img_metadata)
         orig_image_binary = base64.decodebytes(bytes(img_data64, encoding='utf-8'))
     elif (img_url): # did not find imgData, look for imgURL instead
         orig_image_binary = retrieve_image_binary(request, img_url)
@@ -37,6 +38,12 @@ def colorize_image_data():
 
     imgio = io.BytesIO(orig_image_binary)
     image = mpimg.imread(imgio, format=img_format)
+
+    if not img_data:
+        coloredness = distance_from_grayscale(image)
+        print(f'Image distance from grayscale: {coloredness}')
+        if (coloredness > 1):
+            abort(204, description=f'Image already colored: {coloredness} > 1')
 
     class Configuration:
         def __init__(self):
@@ -63,21 +70,21 @@ def colorize_image_data():
     return response
 
 def retrieve_image_binary(orig_req, url):
-    print("Original headers", orig_req.headers)
+    # print("Original headers", orig_req.headers)
     headers={
         'User-Agent': orig_req.headers.get('User-Agent'),
         'Referer': request.referrer,
         'Origin': request.origin,
-        'Accept': 'image/avif,image/webp,*/*',
+        'Accept': 'image/png;q=1.0,image/jpg;q=0.9,image/webp;q=0.7,image/*;q=0.5',
         'Accept-Language': 'en-US,en;q=0.5',
-        'Accept-Encoding': 'gzip, deflate, br' }
-    print("Retrieving", url, headers)
+        'Accept-Encoding': 'identity' }
+    # print("Retrieving", url, headers)
     try:
         req = urllib.request.Request(url, headers=headers)
         return urllib.request.urlopen(req).read()
     except urllib.error.URLError as e:
         print("URLError", e.reason)
-        abort(e.code)
+        abort(500)
     except error as e2:
         print("Retrieve error", e2)
     return False        
