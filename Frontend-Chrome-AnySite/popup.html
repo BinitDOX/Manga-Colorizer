@@ -5,13 +5,17 @@
   <div>
     <div class="title">Manga Colorizer</div>
     <hr />
-    <div class="settings-container">
+    <div class="settings-container" style="display: none;">
       <label class="setting-label" for="checkbox-input">Use Cached Panels</label>
       <input class="checkbox-input" id="checkbox-input" type="checkbox">
     </div>
     <div class="settings-container">
       <label class="setting-label" for="text-input">API URL</label>
       <input class="text-input", type="text" id="url-input-field" />
+    </div>
+    <div class="settings-container">
+      <label class="setting-label" for="text-input">Color Tolerance (0-255)</label>
+      <input class="text-input", type="text" id="coltol-input-field" />
     </div>
     <div class="settings-container">
       <button id="run">Colorize!</button>

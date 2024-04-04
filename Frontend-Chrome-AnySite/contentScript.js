@@ -1,9 +1,13 @@
 (() => {
     const COLOREDCLASS = "mangacolor"; // class applied to img if already colored or coloring requested
+    // Remove COLOREDCLASS from all images when Colorize is pressed to force rescan of all
+    [].forEach.call( document.images, function( img ) {img.classList.remove(COLOREDCLASS)})
+
     var activeFetches = 0;
     var maxActiveFetches = 1;
     var maxImgWidth = 992;
-    var minDistFromGray = 30;
+    var colTol = 30;  // if difference between red, blue, and green values is greater than this for any pixel,
+                      // image is assumed to be in color and will not be recolored
 
     String.prototype.rsplit = function(sep, maxsplit) {
         const split = this.split(sep);
@@ -24,7 +28,7 @@
     }
 
     const isColoredContext = (ctx) => {
-        return maxDistFromGray(ctx) >= minDistFromGray;
+        return (colTol < 255) && maxDistFromGray(ctx) >= colTol;
     }
 
     async function fetchColorizedImg(url, options, img, imgName) {
@@ -117,9 +121,11 @@
 
     const colorizeMangaEventHandler = () => {
         try {
-            chrome.storage.local.get(["apiURL"], (result) => {
+            chrome.storage.local.get(["apiURL", "colTol"], (result) => {
                 const apiURL = result.apiURL;
+                const storedColTol = result.colTol;
                 if (apiURL) {
+                    if (storedColTol > -1) colTol = storedColTol; 
                     console.log('MC: Scanning images...')
                     document.querySelectorAll('img:not(.' + COLOREDCLASS + ')').forEach(img => {
                         if (img.width < 500 || img.height < 500) {

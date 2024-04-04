@@ -1,23 +1,29 @@
-const checkboxInput = document.getElementById("checkbox-input");
+// const checkboxInput = document.getElementById("checkbox-input");
 const urlInput = document.getElementById("url-input-field");
+const colTolInput = document.getElementById("coltol-input-field");
 const runButton = document.getElementById("run");
 
-chrome.storage.local.get(["apiURL", "cachedPanels"], (result) => {
+chrome.storage.local.get(["apiURL", "cachedPanels", "colTol"], (result) => {
   urlInput.value = result.apiURL || "";
-  let useCachedPanels = true;
-  if (result.cachedPanels !== undefined) 
-    checkboxInput.checked = result.cachedPanels
-  else
-    checkboxInput.checked = true;
+  colTolInput.value = result.colTol || "30";
+  // let useCachedPanels = true;
+  // if (result.cachedPanels !== undefined) 
+  //   checkboxInput.checked = result.cachedPanels
+  // else
+  //   checkboxInput.checked = true;
 });
 
 urlInput.addEventListener("change", (event) => {
   chrome.storage.local.set({ apiURL: event.target.value.trim() });
 });
 
-checkboxInput.addEventListener("change", () => {
-  chrome.storage.local.set({ cachedPanels: checkboxInput.checked });
+colTolInput.addEventListener("change", (event) => {
+  chrome.storage.local.set({ colTol: event.target.value.trim() });
 });
+
+// checkboxInput.addEventListener("change", () => {
+//   chrome.storage.local.set({ cachedPanels: checkboxInput.checked });
+// });
 
 runButton.addEventListener("click",() => {    
   chrome.tabs.query({currentWindow: true, active: true}, (tabs) => {
