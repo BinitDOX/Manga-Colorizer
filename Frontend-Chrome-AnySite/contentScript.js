@@ -112,7 +112,7 @@
                 body: JSON.stringify(postData)
             };
             fetchColorizedImg(apiURL + '/colorize-image-data', options, img, imgName)
-                .then(() => {
+                .finally(() => {
                     activeFetches -= 1;
                     colorizeMangaEventHandler();
                 });
