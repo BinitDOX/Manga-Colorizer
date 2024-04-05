@@ -1,11 +1,13 @@
 // const checkboxInput = document.getElementById("checkbox-input");
 const urlInput = document.getElementById("url-input-field");
 const colTolInput = document.getElementById("coltol-input-field");
+const colStrideInput = document.getElementById("colstride-input-field");
 const runButton = document.getElementById("run");
 
-chrome.storage.local.get(["apiURL", "cachedPanels", "colTol"], (result) => {
+chrome.storage.local.get(["apiURL", "cachedPanels", "colTol", "colStride"], (result) => {
   urlInput.value = result.apiURL || "";
   colTolInput.value = result.colTol || "30";
+  colStrideInput.value = result.colStride || "4";
   // let useCachedPanels = true;
   // if (result.cachedPanels !== undefined) 
   //   checkboxInput.checked = result.cachedPanels
@@ -19,6 +21,10 @@ urlInput.addEventListener("change", (event) => {
 
 colTolInput.addEventListener("change", (event) => {
   chrome.storage.local.set({ colTol: event.target.value.trim() });
+});
+
+colStrideInput.addEventListener("change", (event) => {
+  chrome.storage.local.set({ colStride: event.target.value.trim() });
 });
 
 // checkboxInput.addEventListener("change", () => {
