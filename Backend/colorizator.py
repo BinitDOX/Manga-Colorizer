@@ -6,14 +6,14 @@ from networks.models import Colorizer
 from denoising.denoiser import FFDNetDenoiser
 from utils.utils import resize_pad
 
-import PIL.Image, PIL.ImageChops, PIL.ImageOps
+import PIL.ImageChops, PIL.ImageOps
 
 def distance_from_grayscale(image): # img must be a Pillow Image object in RGB mode
     try:
-        pimg = PIL.Image.fromarray((image * 255).astype(np.uint8))
-        img_diff = PIL.ImageChops.difference(pimg, PIL.ImageOps.grayscale(pimg).convert('RGB'))
+        #pimg = PIL.Image.fromarray((image * 255).astype(np.uint8))
+        img_diff = PIL.ImageChops.difference(image, PIL.ImageOps.grayscale(image).convert('RGB'))
         dist = np.array(img_diff.getdata()).mean()
-        pimg.close()
+        #pimg.close()
         return dist
     except:
         return 0

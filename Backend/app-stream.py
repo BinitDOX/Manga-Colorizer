@@ -3,7 +3,8 @@ from flask import Flask, request, send_from_directory, url_for, jsonify, abort
 from flask_cors import CORS
 
 import matplotlib.pyplot as plt
-import matplotlib.image as mpimg
+import PIL.Image
+import numpy as np
 import base64, io
 import urllib.request, urllib.error
 
@@ -37,13 +38,13 @@ def colorize_image_data():
         raise Exception("Neither imgData nor imgURL found in request JSON")
 
     imgio = io.BytesIO(orig_image_binary)
-    image = mpimg.imread(imgio, format=img_format)
+    image = PIL.Image.open(imgio) 
 
     if not img_data:
         coloredness = distance_from_grayscale(image)
         print(f'Image distance from grayscale: {coloredness}')
         if (coloredness > 1):
-            abort(204, description=f'Image already colored: {coloredness} > 1')
+            abort(404, description=f'Image already colored: {coloredness} > 1')
 
     class Configuration:
         def __init__(self):
@@ -90,7 +91,7 @@ def retrieve_image_binary(orig_req, url):
     return False        
 
 def colorize_image(image, colorizer, args):
-    colorizer.set_image(image, args.size, args.denoiser, args.denoiser_sigma)
+    colorizer.set_image((np.array(image).astype('float32') / 255), args.size, args.denoiser, args.denoiser_sigma)
     colorized_img = colorizer.colorize()
     return (img_to_base64_str(colorized_img))
 
