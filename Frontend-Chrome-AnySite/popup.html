@@ -11,15 +11,16 @@
     </div>
     <div class="settings-container">
       <label class="setting-label" for="text-input">API URL</label>
-      <input class="text-input", type="text" id="url-input-field" />
+      <input class="text-input" type="text" id="url-input-field" />
+      <button id="test-api">Test</button>
     </div>
     <div class="settings-container">
-      <label class="setting-label" for="text-input">Color Tolerance (0-255)</label>
-      <input class="text-input", type="text" id="coltol-input-field" />
+      <label class="setting-label" for="text-input">Color Tolerance</label>
+      <input class="text-input" type="number" min="0" max="255" id="coltol-input-field" title="Images with colors farther from gray than this will not be recolored"/>
     </div>
     <div class="settings-container">
       <label class="setting-label" for="text-input">Color Stride</label>
-      <input class="text-input", type="text" id="colstride-input-field" />
+      <input class="text-input" type="number" min="0" max="255" id="colstride-input-field" title="Skip this many pixels at edges and between pixels when checking for color" />
     </div>
     <div class="settings-container">
       <button id="run">Colorize!</button>

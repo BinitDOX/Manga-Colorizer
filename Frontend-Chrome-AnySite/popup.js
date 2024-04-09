@@ -3,6 +3,7 @@ const urlInput = document.getElementById("url-input-field");
 const colTolInput = document.getElementById("coltol-input-field");
 const colStrideInput = document.getElementById("colstride-input-field");
 const runButton = document.getElementById("run");
+const testApiButton = document.getElementById("test-api");
 
 chrome.storage.local.get(["apiURL", "cachedPanels", "colTol", "colStride"], (result) => {
   urlInput.value = result.apiURL || "";
@@ -30,6 +31,10 @@ colStrideInput.addEventListener("change", (event) => {
 // checkboxInput.addEventListener("change", () => {
 //   chrome.storage.local.set({ cachedPanels: checkboxInput.checked });
 // });
+
+testApiButton.addEventListener("click",() => {
+  chrome.tabs.create({url: urlInput.value, selected: true, active: true});
+})
 
 runButton.addEventListener("click",() => {    
   chrome.tabs.query({currentWindow: true, active: true}, (tabs) => {

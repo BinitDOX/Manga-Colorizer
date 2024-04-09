@@ -10,7 +10,7 @@ hr {
 }
 
 .main-container {
-  width: 250px;
+  min-width: 350px;
   background-color: #252121;
 }
 
@@ -72,7 +72,7 @@ hr {
 }
 
 .text-input[type="text"] {
-  width: 150px;
+  min-width: 150px;
   height: 25px;
   padding: 5px;
   background-color: black;
@@ -82,6 +82,21 @@ hr {
 }
 
 .text-input[type="text"]:focus {
+  border-color: red;
+  outline: none;
+}
+
+.text-input[type="number"] {
+  min-width: 50px;
+  height: 25px;
+  padding: 5px;
+  background-color: black;
+  border: 1px solid white;
+  color: white;
+  border-radius: 3px;
+}
+
+.text-input[type="number"]:focus {
   border-color: red;
   outline: none;
 }
