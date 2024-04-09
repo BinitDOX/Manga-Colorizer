@@ -44,7 +44,9 @@ def colorize_image_data():
         coloredness = distance_from_grayscale(image)
         print(f'Image distance from grayscale: {coloredness}')
         if (coloredness > 1):
-            abort(404, description=f'Image already colored: {coloredness} > 1')
+            # abort(415, description=f'Image already colored: {coloredness} > 1')
+            response = jsonify({'msg': f'Image already colored: {coloredness} > 1'})
+            return response
 
     class Configuration:
         def __init__(self):
