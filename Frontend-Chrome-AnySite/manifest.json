@@ -2,7 +2,7 @@
   "name": "Any Manga Colorizer",
   "version": "0.3.0",
   "description": "Add color to black-and-white manga",
-  "permissions": ["contextMenus", "activeTab", "scripting", "storage", "tabs"],
+  "permissions": ["activeTab", "scripting", "storage", "tabs"],
   "host_permissions": ["<all_urls>"],
 
   "action": {
