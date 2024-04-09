@@ -50,19 +50,23 @@
     async function fetchColorizedImg(url, options, img, imgName) {
         console.log("MC: fetching:", url, imgName);
         return fetch(url, options)
-            .then(function(response) {
+            .then(response => {
                 if(!response.ok)
-                    throw response.text();
+                    return response.text().then(text => {throw text})
                 else
                     return response.json()})
             .then(json => {
-                img.src = json.colorImgData;
-                img.dataset.src = '';
-                console.log('MC: Colorized', imgName);
+                if (json.msg)
+                    console.log('MC: ', json.msg);
+                if (json.colorImgData) {
+                    img.src = json.colorImgData;
+                    img.dataset.src = '';
+                    console.log('MC: Colorized', imgName);
+                }
             })
-            // .catch(error => {
-            //     console.error('MC: caught fetchColorizedImg error', error);
-            // });
+            .catch(error => {
+                console.log('MC: fetchColorizedImg:', error);
+            });
     }
 
     const canvasContextFromImg = (img) => {
@@ -75,7 +79,7 @@
         return imgContext
     }
 
-    const setColoredOrFetch = (img, apiURL, colorStride, imgContext) => {
+    const setColoredOrFetch = (img, imgName, apiURL, colorStride, imgContext) => {
         var canSendData = true;
         try {
             if (isColoredContext(imgContext, colorStride)) {
@@ -88,7 +92,7 @@
             if (!eIsColor.message.startsWith("Failed to execute 'getImageData'")) {
                 console.log('MC: isColoredContext error', eIsColor)
             } else {
-                console.log('MC: isColoredContext: Could not use getImageData')
+                // console.log('MC: isColoredContext: Could not use getImageData')
             }
         }
 
@@ -119,23 +123,21 @@
         }
     }
 
-    const colorizeImg = (img, apiURL, colorStride, event) => {
-        if (event) {
-            alert('colorizeImg called with event', img, apiURL, event, "colorizing...");
-        }
+    const colorizeImg = (img, apiURL, colorStride) => {
         if (apiURL && !img.classList?.contains(COLOREDCLASS)) try {
             if (!img.complete) throw ('image not complete');
-            imgName = (img.src || img.dataset?.src || '').rsplit('/', 1)[1];
+            const imgName = (img.src || img.dataset?.src || '').rsplit('/', 1)[1];
             if (imgName) {
                 imgContext = canvasContextFromImg(img);
-                setColoredOrFetch(img, apiURL, colorStride, imgContext);
+                setColoredOrFetch(img, imgName, apiURL, colorStride, imgContext);
             }
         } catch(e1) {
             console.log('MC: colorizeImg error', e1)
         }
     }
 
-    const colorizeMangaEventHandler = () => {
+    const colorizeMangaEventHandler = (event=null) => {
+        // if (event) console.log('MC: colorizeMangaEventHandler called with event', event);
         try {
             chrome.storage.local.get(["apiURL", "colTol", "colorStride"], (result) => {
                 const apiURL = result.apiURL;
@@ -144,16 +146,17 @@
                 if (apiURL) {
                     if (storedColTol > -1) colTol = storedColTol; 
                     console.log('MC: Scanning images...')
-                    document.querySelectorAll('img:not(.' + COLOREDCLASS + ')').forEach(img => {
-                        if (img.width < 500 || img.height < 500) {
+                    for (img of document.querySelectorAll('img:not(.' + COLOREDCLASS + ')')) {
+                        if (activeFetches >= maxActiveFetches) break;
+                        if (!img.complete || !img.src) { // try again when this image loads
+                            img.addEventListener('load', colorizeMangaEventHandler, { once: true, passive: true });
+                        } else if (img.width > 0 && img.width < 400 || img.height > 0 && img.height < 200) {
                             // skip small images
-                        } else if (!img.complete) { // try again when this image loads
-                            console.log('image not complete, adding EventListener------------------------------------------');
-                            img.addEventListener('load', colorizeImg.bind(img, apiURL));
+                            // console.log('MC: skip small image', img.width, 'x', img.height)
                         } else {
-                            colorizeImg(img, apiURL, colorStride, null);
+                            colorizeImg(img, apiURL, colorStride);
                         }
-                    });
+                    }
                 }
             });
         } catch (err) {
