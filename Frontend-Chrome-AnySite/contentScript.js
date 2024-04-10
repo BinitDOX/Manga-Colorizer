@@ -144,7 +144,8 @@
                 const storedColTol = result.colTol;
                 const storedColorStride = result.colorStride;
                 if (apiURL) {
-                    if (storedColTol > -1) colTol = storedColTol; 
+                    if (storedColTol > -1) colTol = storedColTol;
+                    if (storedColorStride > -1) colorStride = storedColorStride;
                     console.log('MC: Scanning images...')
                     for (img of document.querySelectorAll('img:not(.' + COLOREDCLASS + ')')) {
                         if (activeFetches >= maxActiveFetches) break;
