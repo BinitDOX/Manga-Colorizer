@@ -13,12 +13,14 @@ chrome.runtime.onInstalled.addListener(({reason}) => {
 });
 
 const injectContent = ((tab) => {
-    if (tab?.url?.startsWith("http")) {
-        // console.log("Injecting in", tab.url);
+    if (tab?.url?.startsWith("http") || tab?.url?.startsWith("file")) try {
+        console.log("Injecting in", tab.url);
         chrome.scripting.executeScript({
-            target: {tabId: tab.id, allFrames: true},
+            target: {tabId: tab.id, allFrames: false},
             files: ["contentScript.js"]
         })
+    } catch {
+        console.log("Unable to inject in", tab.url);
     }
 });
 

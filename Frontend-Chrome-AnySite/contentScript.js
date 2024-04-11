@@ -1,4 +1,5 @@
-(() => {
+if (window.injectedMC !== 1) {
+    window.injectedMC = 1;
     const COLOREDCLASS = "mangacolor"; // class applied to img if already colored or coloring requested
     // Remove COLOREDCLASS from all images when Colorize is pressed to force rescan of all
     [].forEach.call( document.images, function( img ) {img.classList.remove(COLOREDCLASS)})
@@ -163,6 +164,7 @@
         } catch (err) {
             if (err.toString().includes("Extension context invalidated")) {
                 console.log("MC: Extension reloaded, stopping old version");
+                window.injectedMC = undefined;
                 observer?.disconnect();
             } else {
                 console.error("MC:", err);
@@ -174,4 +176,4 @@
 
     const observer = new MutationObserver(colorizeMangaEventHandler);
     observer.observe(document.querySelector("body"), { subtree: true, childList: true });
-})();
+};
