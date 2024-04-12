@@ -140,11 +140,13 @@ if (window.injectedMC !== 1) {
     const colorizeMangaEventHandler = (event=null) => {
         // if (event) console.log('MC: colorizeMangaEventHandler called with event', event);
         try {
-            chrome.storage.local.get(["apiURL", "colTol", "colorStride"], (result) => {
+            chrome.storage.local.get(["apiURL", "colTol", "colorStride", "minImgHeight", "minImgHeight"], (result) => {
                 const apiURL = result.apiURL;
-                const storedColTol = result.colTol;
-                const storedColorStride = result.colorStride;
                 if (apiURL) {
+                    const storedColTol = result.colTol;
+                    const storedColorStride = result.colorStride;
+                    const minImgHeight = Math.min(result.minImgHeight || 200, window.innerHeight/2);
+                    const minImgWidth = Math.min(result.minImgWidth || 400, window.innerWidth/2);                
                     if (storedColTol > -1) colTol = storedColTol;
                     if (storedColorStride > -1) colorStride = storedColorStride;
                     console.log('MC: Scanning images...')
@@ -152,7 +154,7 @@ if (window.injectedMC !== 1) {
                         if (activeFetches >= maxActiveFetches) break;
                         if (!img.complete || !img.src) { // try again when this image loads
                             img.addEventListener('load', colorizeMangaEventHandler, { once: true, passive: true });
-                        } else if (img.width > 0 && img.width < 400 || img.height > 0 && img.height < 200) {
+                        } else if (img.width > 0 && img.width < minImgWidth || img.height > 0 && img.height < minImgHeight) {
                             // skip small images
                             // console.log('MC: skip small image', img.width, 'x', img.height)
                         } else {
