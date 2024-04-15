@@ -1,9 +1,7 @@
 if (window.injectedMC !== 1) {
     window.injectedMC = 1;
     console.log('MC: Starting context script.');
-    const COLOREDCLASS = "mangacolor"; // class applied to img if already colored or coloring requested
-    // Remove COLOREDCLASS from all images when Colorize is pressed to force rescan of all
-    [].forEach.call( document.images, function( img ) {img.classList.remove(COLOREDCLASS)})
+    const maxColoredSrc = 200; // length of img.src to keep in img.coloredsrc
 
     var activeFetches = 0;
     var maxActiveFetches = 1;
@@ -61,6 +59,7 @@ if (window.injectedMC !== 1) {
                 if (json.msg)
                     console.log('MC: ', json.msg);
                 if (json.colorImgData) {
+                    img.coloredsrc = json.colorImgData.slice(0, maxColoredSrc);
                     img.src = json.colorImgData;
                     img.dataset.src = '';
                     console.log('MC: Colorized', imgName);
@@ -85,7 +84,7 @@ if (window.injectedMC !== 1) {
         var canSendData = true;
         try {
             if (isColoredContext(imgContext, colorStride)) {
-                img.classList.add(COLOREDCLASS);
+                img.coloredsrc = img.src.slice(0, maxColoredSrc);
                 console.log('MC: already colored', imgName);
                 return
             }
@@ -100,7 +99,7 @@ if (window.injectedMC !== 1) {
 
         if (activeFetches < maxActiveFetches) {
             activeFetches += 1;
-            img.classList.add(COLOREDCLASS); // Add early so we don't try again while fetching
+            img.coloredsrc = img.src.slice(0, maxColoredSrc); // assume already colored while fetch is in progress
             const postData = {
                 imgName: imgName,
                 imgWidth: Math.min(img.width, maxImgWidth)
@@ -108,7 +107,7 @@ if (window.injectedMC !== 1) {
             if (canSendData)
                 postData.imgData = imgContext.canvas.toDataURL("image/png");
             else
-                postData.imgURL = img.src || img.dataset?.src;
+                postData.imgURL = img.src;
 
             const options = {
                 method: 'POST',
@@ -120,13 +119,16 @@ if (window.injectedMC !== 1) {
             fetchColorizedImg(apiURL + '/colorize-image-data', options, img, imgName)
                 .finally(() => {
                     activeFetches -= 1;
+                    img.coloredsrc = img.src.slice(0, maxColoredSrc);
                     colorizeMangaEventHandler();
                 });
         }
     }
 
+    const imgSrcMatchesColoredSrc = (img) => { return img.src.startsWith(img.coloredsrc)}
+
     const colorizeImg = (img, apiURL, colorStride) => {
-        if (apiURL && !img.classList?.contains(COLOREDCLASS)) try {
+        if (apiURL && (!imgSrcMatchesColoredSrc(img))) try {
             if (!img.complete) throw ('image not complete');
             const imgName = (img.src || img.dataset?.src || '').rsplit('/', 1)[1];
             if (imgName) {
@@ -151,10 +153,12 @@ if (window.injectedMC !== 1) {
                     if (storedColTol > -1) colTol = storedColTol;
                     if (storedColorStride > -1) colorStride = storedColorStride;
                     console.log('MC: Scanning images...')
-                    for (img of document.querySelectorAll('img:not(.' + COLOREDCLASS + ')')) {
+                    for (img of document.querySelectorAll('img')) {
+                        if (imgSrcMatchesColoredSrc(img)) continue;
+                        img.addEventListener('load', colorizeMangaEventHandler, { passive: true });
                         if (activeFetches >= maxActiveFetches) break;
-                        if (!img.complete || !img.src) { // try again when this image loads
-                            img.addEventListener('load', colorizeMangaEventHandler, { once: true, passive: true });
+                        if (!img.complete || !img.src) {
+                            // image not loaded, wait for load event listener
                         } else if (img.width > 0 && img.width < minImgWidth || img.height > 0 && img.height < minImgHeight) {
                             // skip small images
                             // console.log('MC: skip small image', img.width, 'x', img.height)
