@@ -61,7 +61,8 @@ if (window.injectedMC !== 1) {
                 if (json.colorImgData) {
                     img.coloredsrc = json.colorImgData.slice(0, maxColoredSrc);
                     img.src = json.colorImgData;
-                    img.dataset.src = '';
+                    if (img.dataset?.src) img.dataset.src = '';
+                    if (img.srcset) img.srcset = '';
                     console.log('MC: Colorized', imgName);
                 }
             })
