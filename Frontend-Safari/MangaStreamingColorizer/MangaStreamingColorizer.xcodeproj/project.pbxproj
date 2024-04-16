@@ -1,0 +1,962 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 56;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		4DD120FA2BCF09BA005F2C95 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4DD120F92BCF09BA005F2C95 /* AppDelegate.swift */; };
+		4DD120FC2BCF09BA005F2C95 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4DD120FB2BCF09BA005F2C95 /* SceneDelegate.swift */; };
+		4DD120FF2BCF09BA005F2C95 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 4DD120FD2BCF09BA005F2C95 /* LaunchScreen.storyboard */; };
+		4DD121022BCF09BA005F2C95 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 4DD121002BCF09BA005F2C95 /* Main.storyboard */; };
+		4DD1210B2BCF09BA005F2C95 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4DD1210A2BCF09BA005F2C95 /* AppDelegate.swift */; };
+		4DD1210E2BCF09BA005F2C95 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 4DD1210C2BCF09BA005F2C95 /* Main.storyboard */; };
+		4DD121162BCF09BA005F2C95 /* MangaStreamingColorizer Extension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 4DD121152BCF09BA005F2C95 /* MangaStreamingColorizer Extension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		4DD121202BCF09BA005F2C95 /* MangaStreamingColorizer Extension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 4DD1211F2BCF09BA005F2C95 /* MangaStreamingColorizer Extension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		4DD121262BCF09BA005F2C95 /* Main.html in Resources */ = {isa = PBXBuildFile; fileRef = 4DD120E92BCF09B9005F2C95 /* Main.html */; };
+		4DD121272BCF09BA005F2C95 /* Main.html in Resources */ = {isa = PBXBuildFile; fileRef = 4DD120E92BCF09B9005F2C95 /* Main.html */; };
+		4DD121282BCF09BA005F2C95 /* Icon.png in Resources */ = {isa = PBXBuildFile; fileRef = 4DD120EB2BCF09B9005F2C95 /* Icon.png */; };
+		4DD121292BCF09BA005F2C95 /* Icon.png in Resources */ = {isa = PBXBuildFile; fileRef = 4DD120EB2BCF09B9005F2C95 /* Icon.png */; };
+		4DD1212A2BCF09BA005F2C95 /* Style.css in Resources */ = {isa = PBXBuildFile; fileRef = 4DD120EC2BCF09B9005F2C95 /* Style.css */; };
+		4DD1212B2BCF09BA005F2C95 /* Style.css in Resources */ = {isa = PBXBuildFile; fileRef = 4DD120EC2BCF09B9005F2C95 /* Style.css */; };
+		4DD1212C2BCF09BA005F2C95 /* Script.js in Resources */ = {isa = PBXBuildFile; fileRef = 4DD120ED2BCF09B9005F2C95 /* Script.js */; };
+		4DD1212D2BCF09BA005F2C95 /* Script.js in Resources */ = {isa = PBXBuildFile; fileRef = 4DD120ED2BCF09B9005F2C95 /* Script.js */; };
+		4DD1212E2BCF09BA005F2C95 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4DD120EE2BCF09B9005F2C95 /* ViewController.swift */; };
+		4DD1212F2BCF09BA005F2C95 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4DD120EE2BCF09B9005F2C95 /* ViewController.swift */; };
+		4DD121302BCF09BA005F2C95 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 4DD120EF2BCF09BA005F2C95 /* Assets.xcassets */; };
+		4DD121312BCF09BA005F2C95 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 4DD120EF2BCF09BA005F2C95 /* Assets.xcassets */; };
+		4DD121322BCF09BA005F2C95 /* SafariWebExtensionHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4DD120F12BCF09BA005F2C95 /* SafariWebExtensionHandler.swift */; };
+		4DD121332BCF09BA005F2C95 /* SafariWebExtensionHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4DD120F12BCF09BA005F2C95 /* SafariWebExtensionHandler.swift */; };
+		4DD1214C2BCF09BA005F2C95 /* popup.js in Resources */ = {isa = PBXBuildFile; fileRef = 4DD121452BCF09BA005F2C95 /* popup.js */; };
+		4DD1214D2BCF09BA005F2C95 /* background.js in Resources */ = {isa = PBXBuildFile; fileRef = 4DD121462BCF09BA005F2C95 /* background.js */; };
+		4DD1214E2BCF09BA005F2C95 /* popup.html in Resources */ = {isa = PBXBuildFile; fileRef = 4DD121472BCF09BA005F2C95 /* popup.html */; };
+		4DD1214F2BCF09BA005F2C95 /* manifest.json in Resources */ = {isa = PBXBuildFile; fileRef = 4DD121482BCF09BA005F2C95 /* manifest.json */; };
+		4DD121502BCF09BA005F2C95 /* popup.css in Resources */ = {isa = PBXBuildFile; fileRef = 4DD121492BCF09BA005F2C95 /* popup.css */; };
+		4DD121512BCF09BA005F2C95 /* assets in Resources */ = {isa = PBXBuildFile; fileRef = 4DD1214A2BCF09BA005F2C95 /* assets */; };
+		4DD121522BCF09BA005F2C95 /* contentScript.js in Resources */ = {isa = PBXBuildFile; fileRef = 4DD1214B2BCF09BA005F2C95 /* contentScript.js */; };
+		4DD121532BCF09BA005F2C95 /* popup.js in Resources */ = {isa = PBXBuildFile; fileRef = 4DD121452BCF09BA005F2C95 /* popup.js */; };
+		4DD121542BCF09BA005F2C95 /* background.js in Resources */ = {isa = PBXBuildFile; fileRef = 4DD121462BCF09BA005F2C95 /* background.js */; };
+		4DD121552BCF09BA005F2C95 /* popup.html in Resources */ = {isa = PBXBuildFile; fileRef = 4DD121472BCF09BA005F2C95 /* popup.html */; };
+		4DD121562BCF09BA005F2C95 /* manifest.json in Resources */ = {isa = PBXBuildFile; fileRef = 4DD121482BCF09BA005F2C95 /* manifest.json */; };
+		4DD121572BCF09BA005F2C95 /* popup.css in Resources */ = {isa = PBXBuildFile; fileRef = 4DD121492BCF09BA005F2C95 /* popup.css */; };
+		4DD121582BCF09BA005F2C95 /* assets in Resources */ = {isa = PBXBuildFile; fileRef = 4DD1214A2BCF09BA005F2C95 /* assets */; };
+		4DD121592BCF09BA005F2C95 /* contentScript.js in Resources */ = {isa = PBXBuildFile; fileRef = 4DD1214B2BCF09BA005F2C95 /* contentScript.js */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		4DD121172BCF09BA005F2C95 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 4DD120E32BCF09B8005F2C95 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 4DD121142BCF09BA005F2C95;
+			remoteInfo = "MangaStreamingColorizer Extension (iOS)";
+		};
+		4DD121212BCF09BA005F2C95 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 4DD120E32BCF09B8005F2C95 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 4DD1211E2BCF09BA005F2C95;
+			remoteInfo = "MangaStreamingColorizer Extension (macOS)";
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		4DD121392BCF09BA005F2C95 /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				4DD121162BCF09BA005F2C95 /* MangaStreamingColorizer Extension.appex in Embed Foundation Extensions */,
+			);
+			name = "Embed Foundation Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		4DD121402BCF09BA005F2C95 /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				4DD121202BCF09BA005F2C95 /* MangaStreamingColorizer Extension.appex in Embed Foundation Extensions */,
+			);
+			name = "Embed Foundation Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
+/* Begin PBXFileReference section */
+		4DD120EA2BCF09B9005F2C95 /* Base */ = {isa = PBXFileReference; lastKnownFileType = text.html; name = Base; path = ../Base.lproj/Main.html; sourceTree = "<group>"; };
+		4DD120EB2BCF09B9005F2C95 /* Icon.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Icon.png; sourceTree = "<group>"; };
+		4DD120EC2BCF09B9005F2C95 /* Style.css */ = {isa = PBXFileReference; lastKnownFileType = text.css; path = Style.css; sourceTree = "<group>"; };
+		4DD120ED2BCF09B9005F2C95 /* Script.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; path = Script.js; sourceTree = "<group>"; };
+		4DD120EE2BCF09B9005F2C95 /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
+		4DD120EF2BCF09BA005F2C95 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		4DD120F12BCF09BA005F2C95 /* SafariWebExtensionHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SafariWebExtensionHandler.swift; sourceTree = "<group>"; };
+		4DD120F62BCF09BA005F2C95 /* MangaStreamingColorizer.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MangaStreamingColorizer.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		4DD120F92BCF09BA005F2C95 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
+		4DD120FB2BCF09BA005F2C95 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
+		4DD120FE2BCF09BA005F2C95 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
+		4DD121012BCF09BA005F2C95 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
+		4DD121032BCF09BA005F2C95 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		4DD121082BCF09BA005F2C95 /* MangaStreamingColorizer.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MangaStreamingColorizer.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		4DD1210A2BCF09BA005F2C95 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
+		4DD1210D2BCF09BA005F2C95 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
+		4DD1210F2BCF09BA005F2C95 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		4DD121102BCF09BA005F2C95 /* MangaStreamingColorizer.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = MangaStreamingColorizer.entitlements; sourceTree = "<group>"; };
+		4DD121152BCF09BA005F2C95 /* MangaStreamingColorizer Extension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = "MangaStreamingColorizer Extension.appex"; sourceTree = BUILT_PRODUCTS_DIR; };
+		4DD1211A2BCF09BA005F2C95 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		4DD1211F2BCF09BA005F2C95 /* MangaStreamingColorizer Extension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = "MangaStreamingColorizer Extension.appex"; sourceTree = BUILT_PRODUCTS_DIR; };
+		4DD121242BCF09BA005F2C95 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		4DD121252BCF09BA005F2C95 /* MangaStreamingColorizer.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = MangaStreamingColorizer.entitlements; sourceTree = "<group>"; };
+		4DD121452BCF09BA005F2C95 /* popup.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; name = popup.js; path = Resources/popup.js; sourceTree = "<group>"; };
+		4DD121462BCF09BA005F2C95 /* background.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; name = background.js; path = Resources/background.js; sourceTree = "<group>"; };
+		4DD121472BCF09BA005F2C95 /* popup.html */ = {isa = PBXFileReference; lastKnownFileType = text.html; name = popup.html; path = Resources/popup.html; sourceTree = "<group>"; };
+		4DD121482BCF09BA005F2C95 /* manifest.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; name = manifest.json; path = Resources/manifest.json; sourceTree = "<group>"; };
+		4DD121492BCF09BA005F2C95 /* popup.css */ = {isa = PBXFileReference; lastKnownFileType = text.css; name = popup.css; path = Resources/popup.css; sourceTree = "<group>"; };
+		4DD1214A2BCF09BA005F2C95 /* assets */ = {isa = PBXFileReference; lastKnownFileType = folder; name = assets; path = Resources/assets; sourceTree = "<group>"; };
+		4DD1214B2BCF09BA005F2C95 /* contentScript.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; name = contentScript.js; path = Resources/contentScript.js; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		4DD120F32BCF09BA005F2C95 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		4DD121052BCF09BA005F2C95 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		4DD121122BCF09BA005F2C95 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		4DD1211C2BCF09BA005F2C95 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		4DD120E22BCF09B8005F2C95 = {
+			isa = PBXGroup;
+			children = (
+				4DD120E72BCF09B9005F2C95 /* Shared (App) */,
+				4DD120F02BCF09BA005F2C95 /* Shared (Extension) */,
+				4DD120F82BCF09BA005F2C95 /* iOS (App) */,
+				4DD121092BCF09BA005F2C95 /* macOS (App) */,
+				4DD121192BCF09BA005F2C95 /* iOS (Extension) */,
+				4DD121232BCF09BA005F2C95 /* macOS (Extension) */,
+				4DD120F72BCF09BA005F2C95 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		4DD120E72BCF09B9005F2C95 /* Shared (App) */ = {
+			isa = PBXGroup;
+			children = (
+				4DD120EE2BCF09B9005F2C95 /* ViewController.swift */,
+				4DD120EF2BCF09BA005F2C95 /* Assets.xcassets */,
+				4DD120E82BCF09B9005F2C95 /* Resources */,
+			);
+			path = "Shared (App)";
+			sourceTree = "<group>";
+		};
+		4DD120E82BCF09B9005F2C95 /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				4DD120E92BCF09B9005F2C95 /* Main.html */,
+				4DD120EB2BCF09B9005F2C95 /* Icon.png */,
+				4DD120EC2BCF09B9005F2C95 /* Style.css */,
+				4DD120ED2BCF09B9005F2C95 /* Script.js */,
+			);
+			path = Resources;
+			sourceTree = "<group>";
+		};
+		4DD120F02BCF09BA005F2C95 /* Shared (Extension) */ = {
+			isa = PBXGroup;
+			children = (
+				4DD121442BCF09BA005F2C95 /* Resources */,
+				4DD120F12BCF09BA005F2C95 /* SafariWebExtensionHandler.swift */,
+			);
+			path = "Shared (Extension)";
+			sourceTree = "<group>";
+		};
+		4DD120F72BCF09BA005F2C95 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				4DD120F62BCF09BA005F2C95 /* MangaStreamingColorizer.app */,
+				4DD121082BCF09BA005F2C95 /* MangaStreamingColorizer.app */,
+				4DD121152BCF09BA005F2C95 /* MangaStreamingColorizer Extension.appex */,
+				4DD1211F2BCF09BA005F2C95 /* MangaStreamingColorizer Extension.appex */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		4DD120F82BCF09BA005F2C95 /* iOS (App) */ = {
+			isa = PBXGroup;
+			children = (
+				4DD120F92BCF09BA005F2C95 /* AppDelegate.swift */,
+				4DD120FB2BCF09BA005F2C95 /* SceneDelegate.swift */,
+				4DD120FD2BCF09BA005F2C95 /* LaunchScreen.storyboard */,
+				4DD121002BCF09BA005F2C95 /* Main.storyboard */,
+				4DD121032BCF09BA005F2C95 /* Info.plist */,
+			);
+			path = "iOS (App)";
+			sourceTree = "<group>";
+		};
+		4DD121092BCF09BA005F2C95 /* macOS (App) */ = {
+			isa = PBXGroup;
+			children = (
+				4DD1210A2BCF09BA005F2C95 /* AppDelegate.swift */,
+				4DD1210C2BCF09BA005F2C95 /* Main.storyboard */,
+				4DD1210F2BCF09BA005F2C95 /* Info.plist */,
+				4DD121102BCF09BA005F2C95 /* MangaStreamingColorizer.entitlements */,
+			);
+			path = "macOS (App)";
+			sourceTree = "<group>";
+		};
+		4DD121192BCF09BA005F2C95 /* iOS (Extension) */ = {
+			isa = PBXGroup;
+			children = (
+				4DD1211A2BCF09BA005F2C95 /* Info.plist */,
+			);
+			path = "iOS (Extension)";
+			sourceTree = "<group>";
+		};
+		4DD121232BCF09BA005F2C95 /* macOS (Extension) */ = {
+			isa = PBXGroup;
+			children = (
+				4DD121242BCF09BA005F2C95 /* Info.plist */,
+				4DD121252BCF09BA005F2C95 /* MangaStreamingColorizer.entitlements */,
+			);
+			path = "macOS (Extension)";
+			sourceTree = "<group>";
+		};
+		4DD121442BCF09BA005F2C95 /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				4DD121452BCF09BA005F2C95 /* popup.js */,
+				4DD121462BCF09BA005F2C95 /* background.js */,
+				4DD121472BCF09BA005F2C95 /* popup.html */,
+				4DD121482BCF09BA005F2C95 /* manifest.json */,
+				4DD121492BCF09BA005F2C95 /* popup.css */,
+				4DD1214A2BCF09BA005F2C95 /* assets */,
+				4DD1214B2BCF09BA005F2C95 /* contentScript.js */,
+			);
+			name = Resources;
+			path = "Shared (Extension)";
+			sourceTree = SOURCE_ROOT;
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		4DD120F52BCF09BA005F2C95 /* MangaStreamingColorizer (iOS) */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 4DD1213A2BCF09BA005F2C95 /* Build configuration list for PBXNativeTarget "MangaStreamingColorizer (iOS)" */;
+			buildPhases = (
+				4DD120F22BCF09BA005F2C95 /* Sources */,
+				4DD120F32BCF09BA005F2C95 /* Frameworks */,
+				4DD120F42BCF09BA005F2C95 /* Resources */,
+				4DD121392BCF09BA005F2C95 /* Embed Foundation Extensions */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				4DD121182BCF09BA005F2C95 /* PBXTargetDependency */,
+			);
+			name = "MangaStreamingColorizer (iOS)";
+			productName = "MangaStreamingColorizer (iOS)";
+			productReference = 4DD120F62BCF09BA005F2C95 /* MangaStreamingColorizer.app */;
+			productType = "com.apple.product-type.application";
+		};
+		4DD121072BCF09BA005F2C95 /* MangaStreamingColorizer (macOS) */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 4DD121412BCF09BA005F2C95 /* Build configuration list for PBXNativeTarget "MangaStreamingColorizer (macOS)" */;
+			buildPhases = (
+				4DD121042BCF09BA005F2C95 /* Sources */,
+				4DD121052BCF09BA005F2C95 /* Frameworks */,
+				4DD121062BCF09BA005F2C95 /* Resources */,
+				4DD121402BCF09BA005F2C95 /* Embed Foundation Extensions */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				4DD121222BCF09BA005F2C95 /* PBXTargetDependency */,
+			);
+			name = "MangaStreamingColorizer (macOS)";
+			productName = "MangaStreamingColorizer (macOS)";
+			productReference = 4DD121082BCF09BA005F2C95 /* MangaStreamingColorizer.app */;
+			productType = "com.apple.product-type.application";
+		};
+		4DD121142BCF09BA005F2C95 /* MangaStreamingColorizer Extension (iOS) */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 4DD121362BCF09BA005F2C95 /* Build configuration list for PBXNativeTarget "MangaStreamingColorizer Extension (iOS)" */;
+			buildPhases = (
+				4DD121112BCF09BA005F2C95 /* Sources */,
+				4DD121122BCF09BA005F2C95 /* Frameworks */,
+				4DD121132BCF09BA005F2C95 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = "MangaStreamingColorizer Extension (iOS)";
+			productName = "MangaStreamingColorizer Extension (iOS)";
+			productReference = 4DD121152BCF09BA005F2C95 /* MangaStreamingColorizer Extension.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
+		4DD1211E2BCF09BA005F2C95 /* MangaStreamingColorizer Extension (macOS) */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 4DD1213D2BCF09BA005F2C95 /* Build configuration list for PBXNativeTarget "MangaStreamingColorizer Extension (macOS)" */;
+			buildPhases = (
+				4DD1211B2BCF09BA005F2C95 /* Sources */,
+				4DD1211C2BCF09BA005F2C95 /* Frameworks */,
+				4DD1211D2BCF09BA005F2C95 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = "MangaStreamingColorizer Extension (macOS)";
+			productName = "MangaStreamingColorizer Extension (macOS)";
+			productReference = 4DD1211F2BCF09BA005F2C95 /* MangaStreamingColorizer Extension.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		4DD120E32BCF09B8005F2C95 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 1520;
+				LastUpgradeCheck = 1520;
+				TargetAttributes = {
+					4DD120F52BCF09BA005F2C95 = {
+						CreatedOnToolsVersion = 15.2;
+					};
+					4DD121072BCF09BA005F2C95 = {
+						CreatedOnToolsVersion = 15.2;
+					};
+					4DD121142BCF09BA005F2C95 = {
+						CreatedOnToolsVersion = 15.2;
+					};
+					4DD1211E2BCF09BA005F2C95 = {
+						CreatedOnToolsVersion = 15.2;
+					};
+				};
+			};
+			buildConfigurationList = 4DD120E62BCF09B8005F2C95 /* Build configuration list for PBXProject "MangaStreamingColorizer" */;
+			compatibilityVersion = "Xcode 14.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = 4DD120E22BCF09B8005F2C95;
+			productRefGroup = 4DD120F72BCF09BA005F2C95 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				4DD120F52BCF09BA005F2C95 /* MangaStreamingColorizer (iOS) */,
+				4DD121072BCF09BA005F2C95 /* MangaStreamingColorizer (macOS) */,
+				4DD121142BCF09BA005F2C95 /* MangaStreamingColorizer Extension (iOS) */,
+				4DD1211E2BCF09BA005F2C95 /* MangaStreamingColorizer Extension (macOS) */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		4DD120F42BCF09BA005F2C95 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				4DD121282BCF09BA005F2C95 /* Icon.png in Resources */,
+				4DD120FF2BCF09BA005F2C95 /* LaunchScreen.storyboard in Resources */,
+				4DD121262BCF09BA005F2C95 /* Main.html in Resources */,
+				4DD1212C2BCF09BA005F2C95 /* Script.js in Resources */,
+				4DD121302BCF09BA005F2C95 /* Assets.xcassets in Resources */,
+				4DD121022BCF09BA005F2C95 /* Main.storyboard in Resources */,
+				4DD1212A2BCF09BA005F2C95 /* Style.css in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		4DD121062BCF09BA005F2C95 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				4DD121292BCF09BA005F2C95 /* Icon.png in Resources */,
+				4DD1212B2BCF09BA005F2C95 /* Style.css in Resources */,
+				4DD1210E2BCF09BA005F2C95 /* Main.storyboard in Resources */,
+				4DD1212D2BCF09BA005F2C95 /* Script.js in Resources */,
+				4DD121312BCF09BA005F2C95 /* Assets.xcassets in Resources */,
+				4DD121272BCF09BA005F2C95 /* Main.html in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		4DD121132BCF09BA005F2C95 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				4DD121572BCF09BA005F2C95 /* popup.css in Resources */,
+				4DD121562BCF09BA005F2C95 /* manifest.json in Resources */,
+				4DD121592BCF09BA005F2C95 /* contentScript.js in Resources */,
+				4DD121542BCF09BA005F2C95 /* background.js in Resources */,
+				4DD121582BCF09BA005F2C95 /* assets in Resources */,
+				4DD121552BCF09BA005F2C95 /* popup.html in Resources */,
+				4DD121532BCF09BA005F2C95 /* popup.js in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		4DD1211D2BCF09BA005F2C95 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				4DD121502BCF09BA005F2C95 /* popup.css in Resources */,
+				4DD1214F2BCF09BA005F2C95 /* manifest.json in Resources */,
+				4DD121522BCF09BA005F2C95 /* contentScript.js in Resources */,
+				4DD1214D2BCF09BA005F2C95 /* background.js in Resources */,
+				4DD121512BCF09BA005F2C95 /* assets in Resources */,
+				4DD1214E2BCF09BA005F2C95 /* popup.html in Resources */,
+				4DD1214C2BCF09BA005F2C95 /* popup.js in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		4DD120F22BCF09BA005F2C95 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				4DD1212E2BCF09BA005F2C95 /* ViewController.swift in Sources */,
+				4DD120FA2BCF09BA005F2C95 /* AppDelegate.swift in Sources */,
+				4DD120FC2BCF09BA005F2C95 /* SceneDelegate.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		4DD121042BCF09BA005F2C95 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				4DD1212F2BCF09BA005F2C95 /* ViewController.swift in Sources */,
+				4DD1210B2BCF09BA005F2C95 /* AppDelegate.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		4DD121112BCF09BA005F2C95 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				4DD121322BCF09BA005F2C95 /* SafariWebExtensionHandler.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		4DD1211B2BCF09BA005F2C95 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				4DD121332BCF09BA005F2C95 /* SafariWebExtensionHandler.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		4DD121182BCF09BA005F2C95 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 4DD121142BCF09BA005F2C95 /* MangaStreamingColorizer Extension (iOS) */;
+			targetProxy = 4DD121172BCF09BA005F2C95 /* PBXContainerItemProxy */;
+		};
+		4DD121222BCF09BA005F2C95 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 4DD1211E2BCF09BA005F2C95 /* MangaStreamingColorizer Extension (macOS) */;
+			targetProxy = 4DD121212BCF09BA005F2C95 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin PBXVariantGroup section */
+		4DD120E92BCF09B9005F2C95 /* Main.html */ = {
+			isa = PBXVariantGroup;
+			children = (
+				4DD120EA2BCF09B9005F2C95 /* Base */,
+			);
+			name = Main.html;
+			sourceTree = "<group>";
+		};
+		4DD120FD2BCF09BA005F2C95 /* LaunchScreen.storyboard */ = {
+			isa = PBXVariantGroup;
+			children = (
+				4DD120FE2BCF09BA005F2C95 /* Base */,
+			);
+			name = LaunchScreen.storyboard;
+			sourceTree = "<group>";
+		};
+		4DD121002BCF09BA005F2C95 /* Main.storyboard */ = {
+			isa = PBXVariantGroup;
+			children = (
+				4DD121012BCF09BA005F2C95 /* Base */,
+			);
+			name = Main.storyboard;
+			sourceTree = "<group>";
+		};
+		4DD1210C2BCF09BA005F2C95 /* Main.storyboard */ = {
+			isa = PBXVariantGroup;
+			children = (
+				4DD1210D2BCF09BA005F2C95 /* Base */,
+			);
+			name = Main.storyboard;
+			sourceTree = "<group>";
+		};
+/* End PBXVariantGroup section */
+
+/* Begin XCBuildConfiguration section */
+		4DD121342BCF09BA005F2C95 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		4DD121352BCF09BA005F2C95 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				SWIFT_COMPILATION_MODE = wholemodule;
+			};
+			name = Release;
+		};
+		4DD121372BCF09BA005F2C95 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "iOS (Extension)/Info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = "MangaStreamingColorizer Extension";
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				OTHER_LDFLAGS = (
+					"-framework",
+					SafariServices,
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = net.vatavia.MangaStreamingColorizer.Extension;
+				PRODUCT_NAME = "MangaStreamingColorizer Extension";
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		4DD121382BCF09BA005F2C95 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "iOS (Extension)/Info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = "MangaStreamingColorizer Extension";
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				OTHER_LDFLAGS = (
+					"-framework",
+					SafariServices,
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = net.vatavia.MangaStreamingColorizer.Extension;
+				PRODUCT_NAME = "MangaStreamingColorizer Extension";
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		4DD1213B2BCF09BA005F2C95 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "iOS (App)/Info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = MangaStreamingColorizer;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
+				INFOPLIST_KEY_UIMainStoryboardFile = Main;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				OTHER_LDFLAGS = (
+					"-framework",
+					SafariServices,
+					"-framework",
+					WebKit,
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = net.vatavia.MangaStreamingColorizer;
+				PRODUCT_NAME = MangaStreamingColorizer;
+				SDKROOT = iphoneos;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		4DD1213C2BCF09BA005F2C95 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "iOS (App)/Info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = MangaStreamingColorizer;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
+				INFOPLIST_KEY_UIMainStoryboardFile = Main;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				OTHER_LDFLAGS = (
+					"-framework",
+					SafariServices,
+					"-framework",
+					WebKit,
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = net.vatavia.MangaStreamingColorizer;
+				PRODUCT_NAME = MangaStreamingColorizer;
+				SDKROOT = iphoneos;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		4DD1213E2BCF09BA005F2C95 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = "macOS (Extension)/MangaStreamingColorizer.entitlements";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				ENABLE_HARDENED_RUNTIME = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "macOS (Extension)/Info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = "MangaStreamingColorizer Extension";
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@executable_path/../../../../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 10.14;
+				MARKETING_VERSION = 1.0;
+				OTHER_LDFLAGS = (
+					"-framework",
+					SafariServices,
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = net.vatavia.MangaStreamingColorizer.Extension;
+				PRODUCT_NAME = "MangaStreamingColorizer Extension";
+				SDKROOT = macosx;
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+		4DD1213F2BCF09BA005F2C95 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = "macOS (Extension)/MangaStreamingColorizer.entitlements";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				ENABLE_HARDENED_RUNTIME = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "macOS (Extension)/Info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = "MangaStreamingColorizer Extension";
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@executable_path/../../../../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 10.14;
+				MARKETING_VERSION = 1.0;
+				OTHER_LDFLAGS = (
+					"-framework",
+					SafariServices,
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = net.vatavia.MangaStreamingColorizer.Extension;
+				PRODUCT_NAME = "MangaStreamingColorizer Extension";
+				SDKROOT = macosx;
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
+		};
+		4DD121422BCF09BA005F2C95 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = "macOS (App)/MangaStreamingColorizer.entitlements";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				ENABLE_HARDENED_RUNTIME = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "macOS (App)/Info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = MangaStreamingColorizer;
+				INFOPLIST_KEY_NSMainStoryboardFile = Main;
+				INFOPLIST_KEY_NSPrincipalClass = NSApplication;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 10.14;
+				MARKETING_VERSION = 1.0;
+				OTHER_LDFLAGS = (
+					"-framework",
+					SafariServices,
+					"-framework",
+					WebKit,
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = net.vatavia.MangaStreamingColorizer;
+				PRODUCT_NAME = MangaStreamingColorizer;
+				SDKROOT = macosx;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+		4DD121432BCF09BA005F2C95 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = "macOS (App)/MangaStreamingColorizer.entitlements";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				ENABLE_HARDENED_RUNTIME = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "macOS (App)/Info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = MangaStreamingColorizer;
+				INFOPLIST_KEY_NSMainStoryboardFile = Main;
+				INFOPLIST_KEY_NSPrincipalClass = NSApplication;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 10.14;
+				MARKETING_VERSION = 1.0;
+				OTHER_LDFLAGS = (
+					"-framework",
+					SafariServices,
+					"-framework",
+					WebKit,
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = net.vatavia.MangaStreamingColorizer;
+				PRODUCT_NAME = MangaStreamingColorizer;
+				SDKROOT = macosx;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		4DD120E62BCF09B8005F2C95 /* Build configuration list for PBXProject "MangaStreamingColorizer" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				4DD121342BCF09BA005F2C95 /* Debug */,
+				4DD121352BCF09BA005F2C95 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		4DD121362BCF09BA005F2C95 /* Build configuration list for PBXNativeTarget "MangaStreamingColorizer Extension (iOS)" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				4DD121372BCF09BA005F2C95 /* Debug */,
+				4DD121382BCF09BA005F2C95 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		4DD1213A2BCF09BA005F2C95 /* Build configuration list for PBXNativeTarget "MangaStreamingColorizer (iOS)" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				4DD1213B2BCF09BA005F2C95 /* Debug */,
+				4DD1213C2BCF09BA005F2C95 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		4DD1213D2BCF09BA005F2C95 /* Build configuration list for PBXNativeTarget "MangaStreamingColorizer Extension (macOS)" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				4DD1213E2BCF09BA005F2C95 /* Debug */,
+				4DD1213F2BCF09BA005F2C95 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		4DD121412BCF09BA005F2C95 /* Build configuration list for PBXNativeTarget "MangaStreamingColorizer (macOS)" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				4DD121422BCF09BA005F2C95 /* Debug */,
+				4DD121432BCF09BA005F2C95 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 4DD120E32BCF09B8005F2C95 /* Project object */;
+}
