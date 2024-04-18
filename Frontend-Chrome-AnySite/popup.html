@@ -1,0 +1,36 @@
+<link href="popup.css" rel="stylesheet" type="text/css" />
+<script type="module" src="popup.js"></script>
+
+<div class="main-container">
+  <div>
+    <div class="title">Manga Colorizer</div>
+    <hr />
+    <div class="settings-container" style="display: none;">
+      <label class="setting-label" for="checkbox-input">Use Cached Panels</label>
+      <input class="checkbox-input" id="checkbox-input" type="checkbox">
+    </div>
+    <div class="settings-container">
+      <label class="setting-label" for="url-input-field">API URL</label>
+      <input class="text-input" type="text" id="url-input-field" />
+      <button id="test-api">Test</button>
+    </div>
+    <div class="settings-container">
+      <label class="setting-label" for="coltol-input-field">Color Tolerance</label>
+      <input class="text-input" type="number" min="0" max="255" id="coltol-input-field" title="Images with colors farther from gray than this will not be recolored"/>
+    </div>
+    <div class="settings-container">
+      <label class="setting-label" for="colstride-input-field">Color Stride</label>
+      <input class="text-input" type="number" min="0" max="255" id="colstride-input-field" title="Skip this many pixels at edges and between pixels when checking for color" />
+    </div>
+    <div class="settings-container">
+      <label class="setting-label" for="websites-input-field">Manga Sites</label>
+      <textarea id="websites-input-field" rows="5", cols="25" wrap="hard" spellcheck="false"></textarea>
+    </div>
+    <div class="settings-container">
+      <button id="addsite" display="none">Add</button>
+    </div>
+    <div class="settings-container">
+      <button id="run">Colorize!</button>
+    </div>
+  </div>
+</div>
