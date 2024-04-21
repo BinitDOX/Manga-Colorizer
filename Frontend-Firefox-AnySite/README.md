@@ -1,4 +1,4 @@
-#H1 To load this extension in Firefox from a folder:
+# To load this extension in Firefox from a folder:
 0. Make sure your Backend API is running and you have its URL.
 1. Open `about:debugging#/runtime/this-firefox` in the Firefox address bar.
 2. Click 'Load Temporary Add-on'
