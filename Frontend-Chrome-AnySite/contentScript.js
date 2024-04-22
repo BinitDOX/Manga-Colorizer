@@ -118,7 +118,7 @@ if (window.injectedMC !== 1) {
                 },
                 body: JSON.stringify(postData)
             };
-            fetchColorizedImg(apiURL + '/colorize-image-data', options, img, imgName)
+            fetchColorizedImg(new URL('colorize-image-data', apiURL).toString(), options, img, imgName)
                 .finally(() => {
                     activeFetches -= 1;
                     img.coloredsrc = img.src.slice(0, maxColoredSrc);
