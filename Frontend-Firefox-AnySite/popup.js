@@ -1,4 +1,3 @@
-// const checkboxInput = document.getElementById("checkbox-input");
 const urlInput = document.getElementById("url-input-field");
 const colTolInput = document.getElementById("coltol-input-field");
 const colStrideInput = document.getElementById("colstride-input-field");
@@ -36,6 +35,9 @@ browser.storage.local.get(["apiURL", "colTol", "colStride", "websites"], (result
 
 testApiButton.addEventListener("click",() => {
     browser.tabs.create({url: urlInput.value, active: true});
+    browser.storage.local.set({
+        apiURL: urlInput.value.trim()
+    }); 
 })
 
 runButton.addEventListener("click",() => {
