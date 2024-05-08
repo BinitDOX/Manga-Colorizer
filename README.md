@@ -8,6 +8,12 @@ https://user-images.githubusercontent.com/93908298/227715568-52e4c510-aff5-40f7-
 ## Demo Video - Android:
 https://user-images.githubusercontent.com/93908298/227804094-d7552b52-71cf-4d08-b030-ae081c57cc88.mp4
 
+## Note (08/05/24):
+- The limitations listed below are no longer applicable, thanks to <a href="https://github.com/vatavian">Mark</a>.
+- To make the colorizer work for any manga website follow:
+  1. For Firefox: <a href="https://github.com/BinitDOX/Manga-Colorizer/tree/main/Frontend-Chrome-AnySite">Frontend-Chrome-AnySite</a>
+  2. For Chrome: <a href="https://github.com/BinitDOX/Manga-Colorizer/tree/main/Frontend-Firefox-AnySite">Frontend-Firefox-AnySite</a>
+  3. For Safari: <a href="https://github.com/BinitDOX/Manga-Colorizer/tree/main/Frontend-Safari">Frontend-Safari</a>
 
 ## Limitations:
 - Works with https://ww5.manganelo.tv and https://chapmanganelo.com/.
