@@ -35,6 +35,9 @@ chrome.storage.local.get(["apiURL", "colTol", "colStride", "websites"], (result)
 
 testApiButton.addEventListener("click",() => {
     chrome.tabs.create({url: urlInput.value, selected: true, active: true});
+    chrome.storage.local.set({
+        apiURL: urlInput.value.trim()
+    }); 
 })
 
 runButton.addEventListener("click",() => {

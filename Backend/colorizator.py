@@ -20,6 +20,9 @@ def distance_from_grayscale(image): # img must be a Pillow Image object in RGB m
 
 class MangaColorizator:
     def __init__(self, device, generator_path = 'networks/generator.zip', extractor_path = 'networks/extractor.pth'):
+        if (device == 'cuda' and not torch.cuda.is_available()):
+            print("CUDA not available, using CPU.")
+            device = 'cpu'
         self.colorizer = Colorizer().to(device)
         self.colorizer.generator.load_state_dict(torch.load(generator_path, map_location = device))
         self.colorizer = self.colorizer.eval()

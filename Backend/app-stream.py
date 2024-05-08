@@ -2,6 +2,8 @@ from os import error
 from flask import Flask, request, send_from_directory, url_for, jsonify, abort
 from flask_cors import CORS
 
+import time
+import torch
 import matplotlib.pyplot as plt
 import PIL.Image
 import numpy as np
@@ -19,57 +21,48 @@ def index():
 
 @app.route('/colorize-image-data', methods=['POST'])
 def colorize_image_data():
-    img_format = 'PNG'
-    req_json = request.get_json()
-    img_size = req_json.get('imgWidth')
-    if (img_size > 0):
-        img_size = closestDivisibleBy32(img_size)
-    else:
-        img_size = 576
-    img_data = req_json.get('imgData')
-    img_url = req_json.get('imgURL')
-    if (img_data):
-        img_metadata, img_data64 = img_data.split(',', 1)
-        # print("img_metadata", img_metadata)
-        orig_image_binary = base64.decodebytes(bytes(img_data64, encoding='utf-8'))
-    elif (img_url): # did not find imgData, look for imgURL instead
-        orig_image_binary = retrieve_image_binary(request, img_url)
-    else:
-        raise Exception("Neither imgData nor imgURL found in request JSON")
+    response = False
+    try:
+        req_json = request.get_json()
+        img_name = req_json.get('imgName') or 'Image'
+        img_size = req_json.get('imgWidth')
+        if (img_size > 0):
+            img_size = closestDivisibleBy32(img_size)
+        else:
+            img_size = 576
+        print(f'Requested {img_name} size {img_size}')
+        generator = req_json.get('generator') or 'networks/generator.zip'
+        extractor = req_json.get('extractor') or 'networks/extractor.pth'
+        denoiser = True
+        denoiser_sigma = 25
+        device = req_json.get('device') or 'cuda'
+        img_data = req_json.get('imgData')
+        img_url = req_json.get('imgURL')
+        if (img_data):
+            img_metadata, img_data64 = img_data.split(',', 1)
+            # print("img_metadata", img_metadata)
+            orig_image_binary = base64.decodebytes(bytes(img_data64, encoding='utf-8'))
+        elif (img_url): # did not find imgData, look for imgURL instead
+            orig_image_binary = retrieve_image_binary(request, img_url)
+        else:
+            return jsonify({'msg': f'{img_name} Neither imgData nor imgURL found in request JSON'})
 
-    imgio = io.BytesIO(orig_image_binary)
-    image = PIL.Image.open(imgio) 
+        imgio = io.BytesIO(orig_image_binary)
+        image = PIL.Image.open(imgio) 
 
-    if not img_data:
-        coloredness = distance_from_grayscale(image)
-        print(f'Image distance from grayscale: {coloredness}')
-        if (coloredness > 1):
-            # abort(415, description=f'Image already colored: {coloredness} > 1')
-            response = jsonify({'msg': f'Image already colored: {coloredness} > 1'})
-            return response
+        if not img_data:
+            coloredness = distance_from_grayscale(image)
+            print(f'Image distance from grayscale: {coloredness}')
+            if (coloredness > 1):
+                return jsonify({'msg': f'{img_name} already colored: {coloredness} > 1'})
 
-    class Configuration:
-        def __init__(self):
-            self.generator = 'networks/generator.zip'
-            self.extractor = 'networks/extractor.pth'
-            self.gpu = True
-            self.denoiser = True
-            self.denoiser_sigma = 25
-            self.size = img_size
-            self.use_cached = False
-
-    args = Configuration()
-
-    if args.gpu:
-        device = 'cuda'
-    else:
-        device = 'cpu'
-        
-    colorizer = MangaColorizator(device, args.generator, args.extractor)   
-    color_image_data64 = colorize_image(image, colorizer, args)
-
-    response = jsonify({'colorImgData': color_image_data64})
-    response.headers.add('Access-Control-Allow-Origin', '*')
+        colorizer = MangaColorizator(device, generator, extractor)
+        color_image_data64 = colorize_image(image, colorizer, img_size, denoiser, denoiser_sigma)
+        if (color_image_data64):
+            response = jsonify({'colorImgData': color_image_data64})
+    except RuntimeError as e:
+        print(str(e)[:256])
+    response = response or jsonify({'msg': f'{img_name}: unable to color.'})
     return response
 
 def retrieve_image_binary(orig_req, url):
@@ -81,7 +74,7 @@ def retrieve_image_binary(orig_req, url):
         'Accept': 'image/png;q=1.0,image/jpg;q=0.9,image/webp;q=0.7,image/*;q=0.5',
         'Accept-Language': 'en-US,en;q=0.5',
         'Accept-Encoding': 'identity' }
-    # print("Retrieving", url, headers)
+    print("Retrieving", url, headers)
     try:
         req = urllib.request.Request(url, headers=headers)
         return urllib.request.urlopen(req).read()
@@ -92,10 +85,24 @@ def retrieve_image_binary(orig_req, url):
         print("Retrieve error", e2)
     return False        
 
-def colorize_image(image, colorizer, args):
-    colorizer.set_image((np.array(image).astype('float32') / 255), args.size, args.denoiser, args.denoiser_sigma)
-    colorized_img = colorizer.colorize()
-    return (img_to_base64_str(colorized_img))
+def colorize_image(image, colorizer, size, denoiser, denoiser_sigma):
+    while (size > 32):
+        start_time = time.time()
+        try:
+            colorizer.set_image((np.array(image).astype('float32') / 255), size, denoiser, denoiser_sigma)
+            colorized_img = colorizer.colorize()
+            print(f'Colorized size {size} in {time.time() - start_time} seconds.')
+            return img_to_base64_str(colorized_img)
+        except RuntimeError as e:
+            se = str(e)
+            if 'out of memory' in se:
+                se0 = se.split('.')[0]
+                print(f'{se0} Size {size} in {time.time() - start_time} seconds. Trying with smaller size.')
+                torch.cuda.empty_cache()
+                size -= 64
+            else:
+                raise e
+    return False
 
 # def img_from_base64(img64):
 #     orig_image_binary = base64.decodebytes(bytes(img64, encoding='utf-8'))

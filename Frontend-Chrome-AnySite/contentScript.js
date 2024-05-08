@@ -1,3 +1,4 @@
+'use strict';
 if (window.injectedMC !== 1) {
     window.injectedMC = 1;
     console.log('MC: Starting context script.');
@@ -117,7 +118,7 @@ if (window.injectedMC !== 1) {
                 },
                 body: JSON.stringify(postData)
             };
-            fetchColorizedImg(apiURL + '/colorize-image-data', options, img, imgName)
+            fetchColorizedImg(new URL('colorize-image-data', apiURL).toString(), options, img, imgName)
                 .finally(() => {
                     activeFetches -= 1;
                     img.coloredsrc = img.src.slice(0, maxColoredSrc);
@@ -133,7 +134,7 @@ if (window.injectedMC !== 1) {
             if (!img.complete) throw ('image not complete');
             const imgName = (img.src || img.dataset?.src || '').rsplit('/', 1)[1];
             if (imgName) {
-                imgContext = canvasContextFromImg(img);
+                let imgContext = canvasContextFromImg(img);
                 setColoredOrFetch(img, imgName, apiURL, colorStride, imgContext);
             }
         } catch(e1) {
@@ -154,7 +155,7 @@ if (window.injectedMC !== 1) {
                     if (storedColTol > -1) colTol = storedColTol;
                     if (storedColorStride > -1) colorStride = storedColorStride;
                     console.log('MC: Scanning images...')
-                    for (img of document.querySelectorAll('img')) {
+                    for (let img of document.querySelectorAll('img')) {
                         if (imgSrcMatchesColoredSrc(img)) continue;
                         img.addEventListener('load', colorizeMangaEventHandler, { passive: true });
                         if (activeFetches >= maxActiveFetches) break;
