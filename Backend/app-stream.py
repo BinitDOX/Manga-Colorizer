@@ -9,6 +9,7 @@ import PIL.Image
 import numpy as np
 import base64, io
 import urllib.request, urllib.error
+import argparse
 
 from colorizator import MangaColorizator, distance_from_grayscale
 
@@ -131,5 +132,13 @@ def closestDivisibleBy32(n):
     return n2
 
 if __name__ == '__main__':
-    context = ('server.crt', 'server.key')
-    app.run(host='0.0.0.0', port=5000, ssl_context=context)
+    parser = argparse.ArgumentParser(description='Run Flask app with optional SSL context.')
+    parser.add_argument('--no-ssl', action='store_true', help='Disable SSL context.')
+    
+    args = parser.parse_args()
+
+    if args.no_ssl:
+        app.run(host='0.0.0.0', port=5000)
+    else:
+        context = ('server.crt', 'server.key')
+        app.run(host='0.0.0.0', port=5000, ssl_context=context)
