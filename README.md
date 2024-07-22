@@ -14,9 +14,10 @@ https://user-images.githubusercontent.com/93908298/227804094-d7552b52-71cf-4d08-
   1. For Firefox: <a href="https://github.com/BinitDOX/Manga-Colorizer/tree/main/Frontend-Chrome-AnySite">Frontend-Chrome-AnySite</a>
   2. For Chrome: <a href="https://github.com/BinitDOX/Manga-Colorizer/tree/main/Frontend-Firefox-AnySite">Frontend-Firefox-AnySite</a>
   3. For Safari: <a href="https://github.com/BinitDOX/Manga-Colorizer/tree/main/Frontend-Safari">Frontend-Safari</a>
+- (23/07/24) Use <a href="https://www.kaggle.com/yeeandres/manga-colorizer-server-stream">this</a> kaggle notebook with the same server instructions below, for AnySite type.
 
 ## Limitations:
-- Works with https://ww5.manganelo.tv and https://chapmanganelo.com/.
+- <s>Works with https://ww5.manganelo.tv and https://chapmanganelo.com/.</s>
 - Compatible with <b>Firefox, Chrome, Firefox Nightly Android and Kiwi</b> (Basically Android Chrome with extension) browser.
 - <s>Backend server is not hosted, so self local hosting is required. (Python required) (Only works in LAN)</s>
 
