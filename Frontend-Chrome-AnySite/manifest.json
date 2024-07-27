@@ -1,6 +1,6 @@
 {
   "name": "Any Manga Colorizer",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "Add color to black-and-white manga",
   "permissions": ["activeTab", "scripting", "storage", "tabs"],
   "host_permissions": ["<all_urls>"],

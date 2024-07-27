@@ -6,7 +6,8 @@ if (window.injectedMC !== 1) {
 
     var activeFetches = 0;
     var maxActiveFetches = 1;
-    var maxImgWidth = 992;
+    var maxImgWidth = 5000;
+	var maxImgHeight = 5000;
 
     var colTol = 30;  // If difference between red, blue, and green values is greater than this for any pixel,
                       // image is assumed to be in color and will not be recolored.
@@ -104,7 +105,8 @@ if (window.injectedMC !== 1) {
             img.coloredsrc = img.src.slice(0, maxColoredSrc); // assume already colored while fetch is in progress
             const postData = {
                 imgName: imgName,
-                imgWidth: Math.min(img.width, maxImgWidth)
+                imgWidth: Math.min(img.width, maxImgWidth),
+				imgHeight: Math.min(img.height, maxImgHeight)
             }
             if (canSendData)
                 postData.imgData = imgContext.canvas.toDataURL("image/png");
