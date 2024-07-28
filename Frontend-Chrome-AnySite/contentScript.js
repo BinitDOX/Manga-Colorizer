@@ -7,7 +7,7 @@ if (window.injectedMC !== 1) {
     var activeFetches = 0;
     var maxActiveFetches = 1;
     var maxImgWidth = 5000;
-	var maxImgHeight = 5000;
+    var maxImgHeight = 5000;
 
     var colTol = 30;  // If difference between red, blue, and green values is greater than this for any pixel,
                       // image is assumed to be in color and will not be recolored.
