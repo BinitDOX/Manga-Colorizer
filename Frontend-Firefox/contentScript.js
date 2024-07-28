@@ -1,128 +1,208 @@
-(() => {
-    let mangaTitle = '';
-    let mangaChapter = '';
-    let useCachedPanels = true;
-    let baseUrl = '';
+'use strict';
+if (window.injectedMC !== 1) {
+    window.injectedMC = 1;
+    console.log('[MC] Starting context script');
+    const maxColoredSrc = 200; // Length of img.src to keep in img.coloredsrc
+
+    var activeFetches = 0;
+    var maxActiveFetches = 1;
+    var maxImgWidth = 5000;
+    var maxImgHeight = 5000;
+
+    var colorTolerance = 30;  // If difference between red, blue, and green values is greater than this for any pixel,
+                      // image is assumed to be in color and will not be recolored.
+
+    var colorStride = 4; // When checking for an already-colored image,
+                         // skip this many rows and columns at edges and between pixels.
+                         // Check every pixel for color if zero.
+
+    var denoise = true
+    var colorize = true
+    var upscale = true
+
+    var upscaleFactor = 4  // Image upscale factor x2 or x4
+    var denoiseSigma = 25  // Expected noise in image
 
     String.prototype.rsplit = function(sep, maxsplit) {
-        var split = this.split(sep);
+        const split = this.split(sep);
         return maxsplit ? [ split.slice(0, -maxsplit).join(sep) ].concat(split.slice(-maxsplit)) : split;
     }
 
-    browser.storage.local.get("baseURL").then((result) => {
-        baseUrl = result.baseURL || "";
-      });
-
-    browser.storage.local.get("cachedPanels", ({ cachedPanels: value }) => {
-      if (value !== undefined) {
-        useCachedPanels = value;
-      }
-    });
-
-    browser.runtime.onMessage.addListener((message) => {
-        if (message.useCachedPanels !== undefined) {
-          useCachedPanels = message.useCachedPanels;
+    const maxDistFromGray = (ctx) => {
+        const bpp = 4 // Bytes per pixel = number of channels (RGBA)
+        const rows = ctx.canvas.height - colorStride * 2;
+        const cols = ctx.canvas.width - colorStride * 2;
+        // Skip first and last colorStride rows and columns when getting data
+        const imageData = ctx.getImageData(colorStride, colorStride, cols, rows);
+        const rowStride = colorStride + 1;
+        const rowBytes = cols * bpp;
+        const pxStride = bpp * (colorStride + 1);
+        var maxDist = 0;
+        for (let row = 0; row < rows; row += rowStride) {
+            const rowStart = row * rowBytes;
+            const rowEnd = rowStart + rowBytes;
+            for (let i = rowStart; i < rowEnd; i += pxStride) {
+                const red = imageData.data[i];
+                const green = imageData.data[i + 1];
+                const blue = imageData.data[i + 2];
+                maxDist = Math.max(Math.abs(red-blue), Math.abs(red-green), Math.abs(blue-green), maxDist)
+            }
         }
-    });
+        console.log('[MC] Max distance from gray: ', maxDist)
+        return maxDist;
+    }
 
-    const newChapterLoaded = () => {
-        mangaTitle = document.getElementsByClassName('panel-breadcrumb')[0].querySelectorAll('a')[1].innerText;
-        mangaChapter = document.getElementsByClassName('panel-breadcrumb')[0].querySelectorAll('a')[2].innerText;
+    const isColoredContext = (ctx) => {
+        return (colorTolerance < 255) && maxDistFromGray(ctx) > colorTolerance;
+    }
 
-        const colorizeBtnExists = document.getElementsByClassName('colorize-btn')[0];
-        if (!colorizeBtnExists) {
-            const colorizeBtn = document.createElement('a');
+    async function fetchColorizedImg(url, options, img, imgName) {
+        console.log('[MC] Fetching: ', url, imgName);
+        return fetch(url, options)
+            .then(response => {
+                if(!response.ok)
+                    return response.text().then(text => {throw text})
+                else
+                    return response.json()})
+            .then(json => {
+                if (json.msg)
+                    console.log('[MC] Message: ', json.msg);
+                if (json.colorImgData) {
+                    img.coloredsrc = json.colorImgData.slice(0, maxColoredSrc);
+                    img.src = json.colorImgData;
+                    if (img.dataset?.src) img.dataset.src = '';
+                    if (img.srcset) img.srcset = '';
+                    console.log('[MC] Processed: ', imgName);
+                }
+            })
+            .catch(error => {
+                console.log('[MC] Fetch error: ', error);
+            });
+    }
 
-            colorizeBtn.className = 'colorize-btn ' + 'navi-change-chapter-btn-next';
-            colorizeBtn.innerHTML = 'COLORIZE CHAPTER'
-            colorizeBtn.title = 'Click to colorize current chapter';
+    const canvasContextFromImg = (img) => {
+        const imgCanvas = document.createElement("canvas");
+        imgCanvas.width = img.width;
+        imgCanvas.height = img.height;
 
-            mangaNavigationControls = document.getElementsByClassName('navi-change-chapter-btn')[0];
-            
-            mangaNavigationControls.append(colorizeBtn);
-            colorizeBtn.addEventListener('click', colorizeMangaEventHandler);
+        const imgContext = imgCanvas.getContext("2d", { willReadFrequently: true });
+        imgContext.drawImage(img, 0, 0, imgCanvas.width, imgCanvas.height);
+        return imgContext
+    }
+
+    const setColoredOrFetch = (img, imgName, apiURL, colorStride, imgContext) => {
+        var canSendData = true;
+        try {
+            if (isColoredContext(imgContext, colorStride)) {
+                img.coloredsrc = img.src.slice(0, maxColoredSrc);
+                console.log('[MC] Already colored: ', imgName);
+                return
+            }
+        } catch(eIsColor) {
+            canSendData = false
+            if (!eIsColor.message.startsWith("Failed to execute 'getImageData'")) {
+                console.log('[MC] Colorized context error: ', eIsColor)
+            }
+        }
+
+        if (activeFetches < maxActiveFetches) {
+            activeFetches += 1;
+            img.coloredsrc = img.src.slice(0, maxColoredSrc); // Assume already colored while fetch is in progress
+            const postData = {
+                imgName: imgName,
+                imgWidth: Math.min(img.width, maxImgWidth),
+				imgHeight: Math.min(img.height, maxImgHeight),
+				denoise: denoise,
+				colorize: colorize,
+				upscale: upscale,
+				denoiseSigma: Number(denoiseSigma),
+				upscaleFactor: Number(upscaleFactor)
+            }
+            if (canSendData)
+                postData.imgData = imgContext.canvas.toDataURL("image/png");
+            else
+                postData.imgURL = img.src;
+
+            const options = {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(postData)
+            };
+            fetchColorizedImg(new URL('colorize-image-data', apiURL).toString(), options, img, imgName)
+                .finally(() => {
+                    activeFetches -= 1;
+                    img.coloredsrc = img.src.slice(0, maxColoredSrc);
+                    colorizeMangaEventHandler();
+                });
         }
     }
 
-    const colorizeMangaEventHandler = () => {
-        browser.storage.local.get("cachedPanels", ({ cachedPanels: value }) => {
-            if (value !== undefined) {
-              useCachedPanels = value;
+    const imgSrcMatchesColoredSrc = (img) => { return img.src.startsWith(img.coloredsrc)}
+
+    const colorizeImg = (img, apiURL, colorStride) => {
+        if (apiURL && (!imgSrcMatchesColoredSrc(img))) try {
+            if (!img.complete) throw ('image not complete');
+            const imgName = (img.src || img.dataset?.src || '').rsplit('/', 1)[1];
+            if (imgName) {
+                let imgContext = canvasContextFromImg(img);
+                setColoredOrFetch(img, imgName, apiURL, colorStride, imgContext);
             }
-        });
-
-        browser.storage.local.get("baseURL").then((result) => {
-            baseUrl = result.baseURL || "";
-        });
-
-        console.log('MC: Sending Panels...')
-        const colorizeBtn = document.getElementsByClassName('colorize-btn navi-change-chapter-btn-next')[0];
-        colorizeBtn.innerHTML = 'COLORIZING...';
-        colorizeBtn.removeEventListener("click", colorizeMangaEventHandler);
-
-        imageElements = document.getElementsByClassName('container-chapter-reader')[0].querySelectorAll('img');
-        
-        const imgSrcList = [];
-        imageElements.forEach(imageElement => {
-            if(imageElement.src != '')
-                imgSrcList.push(imageElement.src)
-            else if(imageElement.dataset.src != '')
-                imgSrcList.push(imageElement.dataset.src)
-            else
-                imgSrcList.push('error')
-        });
-
-        const data = {
-            mangaTitle: mangaTitle,
-            mangaChapter: mangaChapter,
-            imgSrcList: imgSrcList,
-            useCachedPanels: useCachedPanels
-        };
-
-        const options = {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(data)
-        };
-
-        let curl = baseUrl + '/colorize-images';
-        fetch(curl, options)
-            .then(response => response.json())
-            .then(data => {
-                console.log('MC: Setting Panels...');
-                colorized_urls = data['colorized_urls']
-                imageElements = document.getElementsByClassName('container-chapter-reader')[0].querySelectorAll('img');
-                imageElements.forEach(imageElement => {
-                    if(imageElement.src != ''){
-                        f_name = imageElement.src.rsplit('/', 1)[1].rsplit('.', 1)[0];
-                        colorized_urls.forEach(url => {
-                            const cf_name = url.rsplit('/', 1)[1].rsplit('.', 1)[0];
-                            if(cf_name === f_name){
-                                imageElement.src = baseUrl + url;
-                                imageElement.dataset.src = '';
-                            }
-                        });
-                    } else if(imageElement.dataset.src != ''){
-                        f_name = imageElement.dataset.src.rsplit('/', 1)[1].rsplit('.', 1)[0];
-                        colorized_urls.forEach(url => {
-                            const cf_name = url.rsplit('/', 1)[1].rsplit('.', 1)[0];
-                            if(cf_name === f_name){
-                                imageElement.src = baseUrl + url;
-                                imageElement.dataset.src = '';
-                            }
-                        });
-                    }
-                });
-                colorizeBtn.innerHTML = 'COLORIZED!'
-            })
-            .catch(error => {
-                colorizeBtn.innerHTML = 'ERROR!'
-                console.error('MC: ' + error);
-                colorizeBtn.addEventListener('click', colorizeMangaEventHandler);
-            });
+        } catch(e) {
+            console.log('[MC] Colorize image error: ', e)
         }
+    }
 
-    newChapterLoaded();
-})();
+    const colorizeMangaEventHandler = (event=null) => {
+        try {
+            browser.storage.local.get(["apiURL", "denoise", "colorize", "upscale", "denoiseSigma", "upscaleFactor",
+                "colorTolerance", "colorStride", "minImgHeight", "minImgHeight"], (result) => {
+                const apiURL = result.apiURL;
+                if (apiURL) {
+                    denoise = result.denoise
+                    colorize = result.colorize
+                    upscale = result.upscale
+                    denoiseSigma = result.denoiseSigma || "25"
+                    upscaleFactor = result.upscaleFactor || "4"
+
+                    const storedColorTolerance = result.colorTolerance;
+                    const storedColorStride = result.colorStride;
+                    const minImgHeight = Math.min(result.minImgHeight || 200, window.innerHeight/2);
+                    const minImgWidth = Math.min(result.minImgWidth || 400, window.innerWidth/2);
+
+                    if (storedColorTolerance > -1) colorTolerance = storedColorTolerance;
+                    if (storedColorStride > -1) colorStride = storedColorStride;
+
+                    console.log('[MC] Scanning images...')
+                    for (let img of document.querySelectorAll('img')) {
+                        if (imgSrcMatchesColoredSrc(img)) continue;
+                        img.addEventListener('load', colorizeMangaEventHandler, { passive: true });
+                        if (activeFetches >= maxActiveFetches) break;
+                        if (!img.complete || !img.src) {
+                            // Image not loaded, wait for load event listener
+                        } else if (img.width > 0 && img.width < minImgWidth || img.height > 0 && img.height < minImgHeight) {
+                            // Skip small images
+                            // console.log('MC: skip small image', img.width, 'x', img.height)
+                        } else {
+                            colorizeImg(img, apiURL, colorStride);
+                        }
+                    }
+                }
+            });
+        } catch (err) {
+            if (err.toString().includes('Extension context invalidated')) {
+                console.log('[MC] Extension reloaded, stopping old version');
+                window.injectedMC = undefined;
+                observer?.disconnect();
+            } else {
+                console.error('[MC] Error: ', err);
+            }
+        }
+    }
+
+    colorizeMangaEventHandler();
+
+    const observer = new MutationObserver(colorizeMangaEventHandler);
+    observer.observe(document.querySelector("body"), { subtree: true, childList: true });
+};

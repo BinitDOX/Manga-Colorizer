@@ -44,7 +44,6 @@ const injectInCurrentTab = (() => {
 })
 async function storageChangeListener(changes, area) {
     if (area === 'local') {
-        // console.log('storage.onChanged', JSON.stringify(changes));
         if (changes?.websites?.newValue) {
             setWebsitesFromString(changes?.websites?.newValue);
             injectInWebsites();

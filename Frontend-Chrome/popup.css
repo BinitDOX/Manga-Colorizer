@@ -10,7 +10,7 @@ hr {
 }
 
 .main-container {
-  width: 250px;
+  min-width: 350px;
   background-color: #252121;
 }
 
@@ -35,13 +35,14 @@ hr {
   margin-right: 10px;
 }
 
-.checkbox-input[type="checkbox"] {
+.checkbox-input[type="checkbox"],
+.radio-input[type="radio"] {
   -webkit-appearance: none;
   -moz-appearance: none;
   appearance: none;
   width: 15px;
   height: 15px;
-  border-radius: 50%;
+  border-radius: 0; /* Changed from 50% to 0 for square shape */
   border: 2px solid #fff;
   outline: none;
   transition: background-color 0.2s ease;
@@ -50,7 +51,8 @@ hr {
   background-color: #000;
 }
 
-.checkbox-input[type="checkbox"]:checked::before {
+.checkbox-input[type="checkbox"]:checked::before,
+.radio-input[type="radio"]:checked::before {
   content: "";
   display: block;
   position: absolute;
@@ -59,20 +61,22 @@ hr {
   transform: translate(-50%, -50%);
   width: 5px;
   height: 5px;
-  border-radius: 50%;
   background-color: red;
 }
 
-.checkbox-input[type="checkbox"]:hover {
+.checkbox-input[type="checkbox"]:hover,
+.radio-input[type="radio"]:hover {
   background-color: rgba(255, 255, 255, 0.1);
 }
 
-.checkbox-input[type="checkbox"]:focus {
+.checkbox-input[type="checkbox"]:focus,
+.radio-input[type="radio"]:focus {
   box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.2);
 }
 
-.text-input[type="text"] {
-  width: 150px;
+.text-input[type="text"],
+.text-input[type="textarea"] {
+  min-width: 150px;
   height: 25px;
   padding: 5px;
   background-color: black;
@@ -81,7 +85,55 @@ hr {
   border-radius: 3px;
 }
 
-.text-input[type="text"]:focus {
+.text-input[type="number"] {
+  min-width: 50px;
+  height: 25px;
+  padding: 5px;
+  background-color: black;
+  border: 1px solid white;
+  color: white;
+  border-radius: 3px;
+}
+
+.text-input[type="text"]:focus,
+.text-input[type="number"]:focus,
+.text-input[type="textarea"]:focus {
   border-color: red;
   outline: none;
+}
+
+textarea {
+  background-color: black;
+  border: 1px solid white;
+  color: white;
+  border-radius: 3px;
+}
+
+textarea:focus {
+  border-color: red;
+  outline: none;
+}
+
+
+button {
+  margin: 5px;
+  height: 37px;
+  padding: 5px;
+  background-color: black;
+  color: white;
+  border: 1px solid white;
+  border-radius: 3px;
+  padding: 5px 10px;
+  cursor: pointer;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+button:hover {
+  background-color: red;
+  color: black;
+}
+
+button:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.2);
 }

@@ -1,31 +1,22 @@
 {
-    "name": "Manga Colorizer",
-    "version": "0.2.0",
-    "description": "Bringing mangas to life",
-    "permissions": ["storage", "tabs"],
-    "host_permissions": ["https://*.manganelo.tv/*", "https://chapmanganelo.com/*"],
-    "content_scripts": [
-      {
-        "matches": ["https://*.manganelo.tv/chapter/*", "https://chapmanganelo.com/*"],
-        "js": ["contentScript.js"]
-      }
-    ],
-    "web_accessible_resources": [
-      {
-        "resources": [
-          "assets/ext-icon.png"
-        ],
-        "matches": ["https://*.manganelo.tv/*", "https://chapmanganelo.com/*"]
-      }
-    ],
-    "action": {
-      "default_icon": {
-        "16": "assets/ext-icon.png",
-        "24": "assets/ext-icon.png",
-        "32": "assets/ext-icon.png"
-      },
-      "default_title": "Manga Colorizer Configuration",
-      "default_popup": "popup.html"
+  "name": "Manga Colorizer",
+  "version": "0.4.0",
+  "description": "Colorize and/or upscale any Manga. May be used for any website with images",
+  "permissions": ["activeTab", "scripting", "storage", "tabs"],
+  "host_permissions": ["<all_urls>"],
+
+  "action": {
+    "default_icon": {
+      "16": "assets/ext-icon.png",
+      "24": "assets/ext-icon.png",
+      "32": "assets/ext-icon.png"
     },
-    "manifest_version": 3
+    "default_title": "Manga Colorizer",
+    "default_popup": "popup.html"
+  },
+  "background": {
+    "service_worker": "background.js",
+    "type": "module"
+  },
+  "manifest_version": 3
 }

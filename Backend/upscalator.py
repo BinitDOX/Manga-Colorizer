@@ -22,11 +22,15 @@ class MangaUpscaler:
 
         self.scale = 4
 
-    def upscale(self, img_tensor):
+    def upscale(self, image, scale):
+        if image.shape[2] == 4:
+            image = image[:, :, :3]  # Discard the alpha channel
+
         with torch.no_grad():
+            img_tensor = torch.from_numpy(image).to(self.device)
             result = img_tensor.permute(2, 0, 1).unsqueeze(0)
             if self.tile_size > 0:
-                result = tile_process(self.model, result.detach(), self.scale, self.tile_size, self.tile_pad)
+                result = tile_process(self.model, result.detach(), scale, self.tile_size, self.tile_pad)
             else:
                 result = self.model(result.detach())
             result = result.data.squeeze().float().cpu().clamp_(0, 1).numpy()

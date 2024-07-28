@@ -1,6 +1,6 @@
 web-ext-artifacts/
 __pycache__/
-Backend/networks/generator.zip
-Backend/manga/*
+Backendx/networks/generator.zip
+Backendx/manga/*
 .vs/
 

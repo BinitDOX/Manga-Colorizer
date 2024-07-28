@@ -3,26 +3,23 @@ Introducing Manga-Colorizer, a tool that brings your mangas to life!
 
 
 ## Demo Video - PC:
-https://user-images.githubusercontent.com/93908298/227715568-52e4c510-aff5-40f7-aa5d-4954c3416253.mp4
+TODO
 
 ## Demo Video - Android:
-https://user-images.githubusercontent.com/93908298/227804094-d7552b52-71cf-4d08-b030-ae081c57cc88.mp4
+TODO
 
-## Note (08/05/24):
-- The limitations listed below are no longer applicable, thanks to <a href="https://github.com/vatavian">Mark</a>.
-- To make the colorizer work for any manga website follow:
-  1. For Firefox: <a href="https://github.com/BinitDOX/Manga-Colorizer/tree/main/Frontend-Chrome-AnySite">Frontend-Chrome-AnySite</a>
-  2. For Chrome: <a href="https://github.com/BinitDOX/Manga-Colorizer/tree/main/Frontend-Firefox-AnySite">Frontend-Firefox-AnySite</a>
-  3. For Safari: <a href="https://github.com/BinitDOX/Manga-Colorizer/tree/main/Frontend-Safari">Frontend-Safari</a>
-- (23/07/24) Use <a href="https://www.kaggle.com/yeeandres/manga-colorizer-server-stream">this</a> kaggle notebook with the same server instructions below, for AnySite type.
+## New Features:
+- [x] Works with any website.
+- [x] Colorize images on the fly.
+- [x] Super resolution upscaling.
+- [x] More extension optional settings.
 
-## Limitations:
-- <s>Works with https://ww5.manganelo.tv and https://chapmanganelo.com/.</s>
-- Compatible with <b>Firefox, Chrome, Firefox Nightly Android and Kiwi</b> (Basically Android Chrome with extension) browser.
-- <s>Backend server is not hosted, so self local hosting is required. (Python required) (Only works in LAN)</s>
+## Notes [TODO]:
+- Old legacy project can be found here.
+- Follow any one of the server and one of client usage instructions.
 
 
-## Server Usage Instructions (KAGGLE HOSTING, NEW)(21/11/23): 
+## Server Usage Instructions (KAGGLE HOSTING) [TODO]: 
 1. Make a <a href="https://www.kaggle.com/">kaggle</a> account and verify using phone to get ~30hrs of weekly GPU.
 2. Make an <a href="https://ngrok.com/">ngrok</a> account and get your auth token from <a href="https://dashboard.ngrok.com/get-started/your-authtoken">here</a>
 3. Go to <a href="https://www.kaggle.com/code/yeeandres/manga-colorizer-server">this</a> notebook and click 'Copy & Edit'
@@ -39,7 +36,7 @@ https://user-images.githubusercontent.com/93908298/227804094-d7552b52-71cf-4d08-
 14. After a few minutes, visit <a href="https://dashboard.ngrok.com/tunnels/agents">here</a> to get the running sessions and get the new API URL and use that for the client.
     
 
-## Server Usage Instructions (SELF HOSTING, OLD): 
+## Server Usage Instructions (SELF HOSTING) [TODO]: 
 0. If you are following this method, please refer <a href="https://github.com/BinitDOX/Manga-Colorizer/issues/6">here</a> for known issues.
 1. Clone or download the repository as .zip and extract. 
 2. Download the <a href="https://drive.google.com/file/d/1qmxUEKADkEM4iYLp1fpPLLKnfZ6tcF-t/view?usp=sharing" rel="nofollow">Generator</a> weights and move it to <code>Backend/networks</code> folder.
@@ -51,7 +48,7 @@ https://user-images.githubusercontent.com/93908298/227804094-d7552b52-71cf-4d08-
    - Backend should be running on localhost (https://127.0.0.1:5000) and Private IP (https://x.x.x.x:5000)
   
   
-## Client Usage Instructions - PC - Firefox: 
+## Client Usage Instructions - PC - Firefox [TODO]: 
 0. Open the server URL (Ex. https://x.x.x.x:5000)
    - It will show some certificate warning, as it is self-signed.
    - Click 'Advanced' and click 'Accept the risk and continue'. ('Proceed, unsafe' for Chrome)
@@ -64,7 +61,7 @@ https://user-images.githubusercontent.com/93908298/227804094-d7552b52-71cf-4d08-
 6. Wait (~20sec-1min, depends on Network and GPU) and Enjoy.
 
 
-## Client Usage Instructions - PC - Chrome: 
+## Client Usage Instructions - PC - Chrome [TODO]: 
 0. Open the server URL (Ex. https://x.x.x.x:5000)
    - It will show some certificate warning, as it is self-signed.
    - Click 'Advanced' and click 'Proceed to x.x.x.x (unsafe)'.
@@ -77,7 +74,7 @@ https://user-images.githubusercontent.com/93908298/227804094-d7552b52-71cf-4d08-
 6. Wait (~20sec-1min, depends on Network and GPU) and Enjoy.
 
 
-## Client Usage Instructions - Android - Firefox Nightly:
+## Client Usage Instructions - Android - Firefox Nightly [TODO]:
 1. Install Firefox Nightly browser on android from google playstore.
 2. Open settings, scroll down and select 'About Firefox Nightly'.
 3. Keep Tapping on Firefox logo, until the Debug menu is enabled.
@@ -92,7 +89,7 @@ https://user-images.githubusercontent.com/93908298/227804094-d7552b52-71cf-4d08-
 12. Unfortunately, only Step-8 has to be repeated at every chapter because of permission issues, so Kiwi Browser is recommended.
 
 
-## Client Usage Instructions - Android - Kiwi (Chrome \w extension):
+## Client Usage Instructions - Android - Kiwi (Chrome \w extension) [TODO]:
 1. Move the 'Frontend-Chrome.crx' file in the Frontend-Chrome folder to your Android device.
 2. Install Kiwi browser on android from google playstore.
 3. Open browser settings menu (3 dots), select 'Extensions', then select '+(from .zip / crx)' and browse for the 'Frontend-Chrome.crx' file.
@@ -104,17 +101,5 @@ https://user-images.githubusercontent.com/93908298/227804094-d7552b52-71cf-4d08-
 9. Click the 'Colorize' button, that should appear next to 'Next chapter'.
 10. Wait (~20sec-1min, depends on Network and GPU) and Enjoy.
 
-
-## Pro Tips:
-- Install the uBlock Origin extension.
-- Before reading a chapter, navigate to the next chapter and initiate the colorization. Then, navigate back to the current chapter immediately. The next time you visit and colorize the next chapter, it will take only 1 to 5 seconds, given that the panel caching is turned on. This means you can merge the colorization time into your reading time.
-
-
-## Troubleshoot:
-- If there is an error, make sure you can always access the server URL from Client device. (Refer Step-0)
-- If there is an error, make sure you entered correct server URL with port number, in 'API Base-URL' of extension settings.
-- If the 'Colorize' button does not appear, click the extension once.
-
-
-## Credits:
+## Credits [TODO]:
 - https://github.com/qweasdd/manga-colorization-v2 for AI Model and Weights.

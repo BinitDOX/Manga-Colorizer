@@ -1,17 +1,64 @@
-<link href="popup.css" rel="stylesheet" type="text/css" />
-<script type="module" src="popup.js"></script>
-
-<div class="main-container">
-  <div>
-    <div class="title">Manga Colorizer Settings:</div>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Manga Colorizer</title>
+  <link href="popup.css" rel="stylesheet" type="text/css" />
+  <script type="module" src="popup.js"></script>
+</head>
+<body>
+  <div class="main-container">
+    <div class="title">Manga Colorizer</div>
     <hr />
     <div class="settings-container">
-      <label class="setting-label" for="checkbox-input">Use Cached Panels</label>
-      <input class="checkbox-input" id="checkbox-input" type="checkbox">
+      <label class="setting-label" for="url-input-field">API URL</label>
+      <input class="text-input" type="text" id="url-input-field" />
+      <button id="test-api">Test</button>
     </div>
     <div class="settings-container">
-      <label class="setting-label" for="text-input">API Base-URL</label>
-      <input class="text-input", type="text" id="url-input-field" />
+      <label class="setting-label" for="denoiser-checkbox">Use Denoiser</label>
+      <input class="checkbox-input" id="denoiser-checkbox" type="checkbox">
+    </div>
+    <div class="settings-container">
+      <label class="setting-label" for="colorizer-checkbox">Use Colorizer</label>
+      <input class="checkbox-input" id="colorizer-checkbox" type="checkbox">
+    </div>
+    <div class="settings-container">
+      <label class="setting-label" for="upscaler-checkbox">Use Upscaler</label>
+      <input class="checkbox-input" id="upscaler-checkbox" type="checkbox">
+    </div>
+    <div class="settings-container">
+      <label class="setting-label">Upscale factor</label>
+      <div id="upscalefactor-selector">
+        <input class="radio-input" type="radio" id="upscale-factor-2" name="upscale-factor" value="2">
+        <label class="setting-label" for="upscale-factor-2">2</label>
+        <input class="radio-input" type="radio" id="upscale-factor-4" name="upscale-factor" value="4" checked>
+        <label class="setting-label" for="upscale-factor-4">4</label>
+      </div>
+    </div>
+    <div class="settings-container">
+      <label class="setting-label" for="denoisesigma-input-field">Denoise Sigma</label>
+      <input class="text-input" type="number" min="0" max="1000" id="denoisesigma-input-field" title="How much noise to expect from the images"/>
+    </div>
+    <div class="settings-container">
+      <label class="setting-label" for="colortolerance-input-field">Color Tolerance</label>
+      <input class="text-input" type="number" min="0" max="255" id="colortolerance-input-field" title="Images with colors farther from gray than this will not be recolored"/>
+    </div>
+    <div class="settings-container">
+      <label class="setting-label" for="colorstride-input-field">Color Stride</label>
+      <input class="text-input" type="number" min="0" max="255" id="colorstride-input-field" title="Skip this many pixels at edges and between pixels when checking for color" />
+    </div>
+    <div class="settings-container">
+      <label class="setting-label" for="websites-input-field">Manga Sites</label>
+      <textarea class="text-input" id="websites-input-field" rows="5" cols="25" wrap="hard" spellcheck="false"></textarea>
+    </div>
+    <div class="settings-container">
+      <button id="addsite" style="display: none;">Add</button>
+    </div>
+    <div class="settings-container">
+      <button id="run">Colorize!</button>
     </div>
   </div>
-</div>
+</body>
+</html>
