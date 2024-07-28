@@ -105,14 +105,20 @@ def check_model_availability(rid, requested, available, name):
         print(f'[-] [{rid}] Requested {name}, but model is not initialized, please run the server without --no-{name}')
 
 
-def retrieve_image_binary(rid, orig_req, url):
-    headers={
-        'User-Agent': orig_req.headers.get('User-Agent'),
-        'Referer': request.referrer,
-        'Origin': request.origin,
+def retrieve_image_binary(rid, original_request, url):
+    user_agent = original_request.headers.get('User-Agent', '')
+    referer = request.referrer if request.referrer else ''
+    origin = request.origin if request.origin else ''
+
+    headers = {
+        'User-Agent': user_agent,
+        'Referer': referer,
+        'Origin': origin,
         'Accept': 'image/png;q=1.0,image/jpg;q=0.9,image/webp;q=0.7,image/*;q=0.5',
         'Accept-Language': 'en-US,en;q=0.5',
-        'Accept-Encoding': 'identity' }
+        'Accept-Encoding': 'identity'
+    }
+
     print(f'[*] Retrieving image from url={url}')
     try:
         req = urllib.request.Request(url, headers=headers)
