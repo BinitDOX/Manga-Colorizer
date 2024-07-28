@@ -105,7 +105,7 @@ if (window.injectedMC !== 1) {
             img.coloredsrc = img.src.slice(0, maxColoredSrc); // assume already colored while fetch is in progress
             const postData = {
                 imgName: imgName,
-                imgWidth: Math.min(img.width, maxImgWidth)
+                imgWidth: Math.min(img.width, maxImgWidth),
                 imgHeight: Math.min(img.height, maxImgHeight)
             }
             if (canSendData)
