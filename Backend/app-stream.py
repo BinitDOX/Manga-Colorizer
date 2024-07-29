@@ -1,6 +1,7 @@
 import argparse
 import base64
 import io
+import random
 import time
 import urllib.error
 import urllib.request
@@ -130,10 +131,12 @@ def handle_cuda_error(e):
     global colorizer, upscaler, denoiser
 
     if 'CUDA error: an illegal memory access was encountered' \
-        in str(e) or 'CUDA out of memory' in str(e):
-        del colorizer
-        del upscaler
-        del denoiser
+        in str(e) or 'CUDA out of memory' in str(e) or \
+        'CUDA error: misaligned address' in str(e):
+        print(f'[-] CUDA Error encountered, reinitializing...')
+        colorizer = None
+        upscaler = None
+        denoiser = None
         clear_torch_cache()
         gc.collect()
         initialize_components()
