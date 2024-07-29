@@ -3,23 +3,17 @@ if (window.injectedMC !== 1) {
     window.injectedMC = 1;
     console.log('[MC] Starting context script');
     const maxColoredSrc = 200; // Length of img.src to keep in img.coloredsrc
-
     var activeFetches = 0;
-    var maxActiveFetches = 1;
-    var maxImgWidth = 5000;
-    var maxImgHeight = 5000;
 
+    var maxActiveFetches = 1;  // Number of images to request and process parallely
     var colorTolerance = 30;  // If difference between red, blue, and green values is greater than this for any pixel,
                       // image is assumed to be in color and will not be recolored.
-
     var colorStride = 4; // When checking for an already-colored image,
                          // skip this many rows and columns at edges and between pixels.
                          // Check every pixel for color if zero.
-                         
     var denoise = true
     var colorize = true
     var upscale = true
-    
     var upscaleFactor = 4  // Image upscale factor x2 or x4
     var denoiseSigma = 25  // Expected noise in image
 
@@ -27,6 +21,33 @@ if (window.injectedMC !== 1) {
         const split = this.split(sep);
         return maxsplit ? [ split.slice(0, -maxsplit).join(sep) ].concat(split.slice(-maxsplit)) : split;
     }
+
+    const siteConfigurations = {
+        'mangadex.org': {
+            titleSelector: 'a[data-v-5d3b2210]',
+            chapterSelector: 'div#chapter-selector span[data-v-d2fabe5b]',
+            getTitle: (document) => document.querySelector(siteConfigurations['mangadex.org'].titleSelector)?.innerText,
+            getChapter: (document) => document.querySelector(siteConfigurations['mangadex.org'].chapterSelector)?.innerText,
+        },
+        'senkuro.com': {
+            titleSelector: 'p.nav-reader-caption__desktop',
+            chapterSelector: 'p.nav-reader-caption__mobile',
+            getTitle: (document) => document.querySelector(siteConfigurations['senkuro.com'].titleSelector)?.innerText,
+            getChapter: (document) => document.querySelector(siteConfigurations['senkuro.com'].chapterSelector)?.innerText,
+        },
+        'chapmanganelo.com': {
+            titleSelector: 'div.panel-breadcrumb a[title]',
+            chapterSelector: 'div.panel-breadcrumb a[title]',
+            getTitle: (document) => document.querySelectorAll(siteConfigurations['chapmanganelo.com'].titleSelector)?.[1]?.innerText,
+            getChapter: (document) => document.querySelectorAll(siteConfigurations['chapmanganelo.com'].chapterSelector)?.[2]?.innerText,
+        },
+        'fanfox.net' : {
+            titleSelector: 'p.reader-header-title-1 a[href]',
+            chapterSelector: 'p.reader-header-title-2',
+            getTitle: (document) => document.querySelector(siteConfigurations['fanfox.net'].titleSelector)?.innerText,
+            getChapter: (document) => document.querySelector(siteConfigurations['fanfox.net'].chapterSelector)?.innerText,
+        }
+    };
 
     const maxDistFromGray = (ctx) => {
         const bpp = 4 // Bytes per pixel = number of channels (RGBA)
@@ -90,18 +111,19 @@ if (window.injectedMC !== 1) {
         return imgContext
     }
 
-    const setColoredOrFetch = (img, imgName, apiURL, colorStride, imgContext) => {
+    const setColoredOrFetch = (img, imgName, apiURL, colorStride, imgContext, mangaProps) => {
         var canSendData = true;
         try {
             if (isColoredContext(imgContext, colorStride)) {
                 img.coloredsrc = img.src.slice(0, maxColoredSrc);
                 console.log('[MC] Already colored: ', imgName);
-                return
+                return 1;
             }
         } catch(eIsColor) {
             canSendData = false
             if (!eIsColor.message.startsWith("Failed to execute 'getImageData'")) {
                 console.log('[MC] Colorized context error: ', eIsColor)
+                return 0;
             }
         }
 
@@ -110,13 +132,17 @@ if (window.injectedMC !== 1) {
             img.coloredsrc = img.src.slice(0, maxColoredSrc); // Assume already colored while fetch is in progress
             const postData = {
                 imgName: imgName,
-                imgWidth: Math.min(img.width, maxImgWidth),
-				imgHeight: Math.min(img.height, maxImgHeight),
+                imgWidth: img.width,
+				imgHeight: img.height,
 				denoise: denoise,
 				colorize: colorize,
 				upscale: upscale,
 				denoiseSigma: Number(denoiseSigma),
-				upscaleFactor: Number(upscaleFactor)
+				upscaleFactor: Number(upscaleFactor),
+
+				mangaTitle: mangaProps.title,
+				mangeChapter: mangaProps.chapter,
+				mangaPage: mangaProps.page.toString()
             }
             if (canSendData)
                 postData.imgData = imgContext.canvas.toDataURL("image/png");
@@ -130,36 +156,43 @@ if (window.injectedMC !== 1) {
                 },
                 body: JSON.stringify(postData)
             };
+
             fetchColorizedImg(new URL('colorize-image-data', apiURL).toString(), options, img, imgName)
                 .finally(() => {
                     activeFetches -= 1;
                     img.coloredsrc = img.src.slice(0, maxColoredSrc);
                     colorizeMangaEventHandler();
                 });
+            return 3
+        } else {
+            return 2;
         }
     }
 
     const imgSrcMatchesColoredSrc = (img) => { return img.src.startsWith(img.coloredsrc)}
 
-    const colorizeImg = (img, apiURL, colorStride) => {
+    const colorizeImg = (img, apiURL, colorStride, mangaProps) => {
         if (apiURL && (!imgSrcMatchesColoredSrc(img))) try {
             if (!img.complete) throw ('image not complete');
             const imgName = (img.src || img.dataset?.src || '').rsplit('/', 1)[1];
             if (imgName) {
                 let imgContext = canvasContextFromImg(img);
-                setColoredOrFetch(img, imgName, apiURL, colorStride, imgContext);
+                return setColoredOrFetch(img, imgName, apiURL, colorStride, imgContext, mangaProps);
             }
+            return 0;
         } catch(e) {
             console.log('[MC] Colorize image error: ', e)
+            return 0;
         }
     }
 
     const colorizeMangaEventHandler = (event=null) => {
         try {
-            chrome.storage.local.get(["apiURL", "denoise", "colorize", "upscale", "denoiseSigma", "upscaleFactor",
+            chrome.storage.local.get(["apiURL", "maxActiveFetches", "denoise", "colorize", "upscale", "denoiseSigma", "upscaleFactor",
                 "colorTolerance", "colorStride", "minImgHeight", "minImgHeight"], (result) => {
                 const apiURL = result.apiURL;
                 if (apiURL) {
+                    maxActiveFetches = Number(result.maxActiveFetches || "1")
                     denoise = result.denoise
                     colorize = result.colorize
                     upscale = result.upscale
@@ -174,20 +207,45 @@ if (window.injectedMC !== 1) {
                     if (storedColorTolerance > -1) colorTolerance = storedColorTolerance;
                     if (storedColorStride > -1) colorStride = storedColorStride;
 
+                    const site = Object.keys(siteConfigurations).find(site => window.location.hostname.includes(site));
+                    const title = site ? (siteConfigurations[site].getTitle(document) || '') : '';
+                    const chapter = site ? (siteConfigurations[site].getChapter(document) || '') : '';
+
+                    console.log(title, chapter)
+                    return;
+
                     console.log('[MC] Scanning images...')
-                    for (let img of document.querySelectorAll('img')) {
-                        if (imgSrcMatchesColoredSrc(img)) continue;
-                        img.addEventListener('load', colorizeMangaEventHandler, { passive: true });
-                        if (activeFetches >= maxActiveFetches) break;
-                        if (!img.complete || !img.src) {
-                            // Image not loaded, wait for load event listener
+
+                    let total = 0;
+                    let skipped = 0;
+                    let colored = 0;
+                    let failed = 0;
+                    let awaited = 0;
+                    let processing = 0;
+
+                    const images = document.querySelectorAll('img');
+                    total= images.length;
+
+                    images.forEach((img, index) => {
+                        if (imgSrcMatchesColoredSrc(img)) {
+                            colored++;
+                        } else if (!img.complete || !img.src) {
+                            img.addEventListener('load', colorizeMangaEventHandler, { passive: true });
+                            skipped++
                         } else if (img.width > 0 && img.width < minImgWidth || img.height > 0 && img.height < minImgHeight) {
-                            // Skip small images
-                            // console.log('MC: skip small image', img.width, 'x', img.height)
+                            skipped++
                         } else {
-                            colorizeImg(img, apiURL, colorStride);
+                            mangaProps = {title: title, chapter: chapter, page: index}
+                            let status = colorizeImg(img, apiURL, colorStride, mangaProps);
+                            switch(status){
+                                case 0: failed++; break;
+                                case 1: colored++; break;
+                                case 2: awaited++; break;
+                                case 3: processing++; break;
+                            }
                         }
-                    }
+                    });
+                    console.log(`[MC] Report: Processing=${processing} Success=${colored} Skipped=${skipped} Failed=${failed} Awaited=${awaited} Total=${total}`)
                 }
             });
         } catch (err) {

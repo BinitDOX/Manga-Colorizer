@@ -4,7 +4,7 @@ import io
 import time
 import urllib.error
 import urllib.request
-from os import error
+import os
 
 import PIL.Image
 import numpy as np
@@ -14,7 +14,7 @@ from flask_cors import CORS
 from denoisator import MangaDenoiser
 from colorizator import MangaColorizator
 from upscalator import MangaUpscaler
-from utils.utils import distance_from_grayscale, generate_random_id, img_to_base64_str
+from utils.utils import distance_from_grayscale, generate_random_id, image_to_base64, load_image_as_base64
 
 app = Flask(__name__)
 CORS(app, resources={r"/*": {"origins": "*"}})
@@ -39,6 +39,10 @@ def colorize_image_data():
         denoise = req_json.get('denoise', config.denoise)
         denoise_sigma = req_json.get('denoiseSigma', config.denoise_sigma)
         upscale_factor = req_json.get('upscaleFactor', config.upscale_factor)
+        cache = req_json.get('mangaTitle', False)
+        manga_title = req_json.get('mangaTitle', '')
+        manga_chapter = req_json.get('mangaChapter', '')
+        manga_page = req_json.get('mangaPage', '')
 
         if denoise_sigma < 0:
             print(f'[-] [{rid}] Denoiser sigma ({denoise_sigma}) cannot be negative, using default')
@@ -52,8 +56,17 @@ def colorize_image_data():
         check_model_availability(rid, upscale, config.upscale, 'upscale')
         check_model_availability(rid, denoise, config.denoise, 'denoise')
 
+        if manga_title and manga_chapter and manga_page:
+            print(f'[+] [{rid}] Detected manga: {manga_title} >> {manga_chapter} >> {manga_page}')
+            if cache and not rid in img_name:
+                cached_image = load_from_cache(manga_title, manga_chapter, manga_page)
+                if cached_image:
+                    print(f'[+] [{rid}] Retrieving cached image')
+                    return jsonify({'colorImgData': cached_image})
+
         print(f'[+] [{rid}] Requested image: {img_name}, Width: {img_width}, Height: {img_height}')
-        print(f'[+] [{rid}] Colorize: {colorize}, Upscale: {upscale}{f"(x{upscale_factor})" if upscale else ""}, Denoise: {denoise}')
+        print(
+            f'[+] [{rid}] Colorize: {colorize}, Upscale: {upscale}{f"(x{upscale_factor})" if upscale else ""}, Denoise: {denoise}')
 
         img_data = req_json.get('imgData')
         img_url = req_json.get('imgURL')
@@ -90,7 +103,17 @@ def colorize_image_data():
             print(f'[*] [{rid}] Upscaling image...')
             image = upscale_image(rid, image, upscaler, upscale_factor)
 
-        result_image_data64 = img_to_base64_str(image)
+        if cache:
+            try:
+                if manga_title and manga_chapter and manga_page and rid not in img_name:
+                    save_to_cache(manga_title, manga_chapter, manga_page, image)
+                    print(f'[+] Imaged cached')
+                else:
+                    print(f'[-] Caching enabled, but manga details could not be detected, skipping')
+            except Exception as te:
+                print(f'[-] Error while cacheing: {te}')
+
+        result_image_data64 = image_to_base64(image)
         return jsonify({'colorImgData': result_image_data64})
 
     except RuntimeError as e:
@@ -98,6 +121,26 @@ def colorize_image_data():
 
     response = jsonify({'msg': f'Image: {img_name}, Error: Unable to colorize'})
     return response
+
+
+def get_cache_filename(manga_title, manga_chapter, manga_page, image_name):
+    title_dir = os.path.join(config.cache_root.strip().replace(' ', '_'), manga_title.strip().replace(' ', '_'))
+    chapter_dir = os.path.join(title_dir, manga_chapter.strip().replace(' ', '_'))
+    filename = f"{manga_page.strip().replace(' ', '_')}_{image_name.strip().replace(' ', '_')}.webp"
+    return os.path.join(chapter_dir, filename)
+
+
+def save_to_cache(manga_title, manga_chapter, manga_page, image):
+    cache_filename = get_cache_filename(manga_title, manga_chapter, manga_page)
+    os.makedirs(os.path.dirname(cache_filename), exist_ok=True)
+    image.save(cache_filename, format="WEBP")
+
+
+def load_from_cache(manga_title, manga_chapter, manga_page):
+    cache_filename = get_cache_filename(manga_title, manga_chapter, manga_page)
+    if os.path.exists(cache_filename):
+        return load_image_as_base64(cache_filename)
+    return None
 
 
 def check_model_availability(rid, requested, available, name):
@@ -126,7 +169,7 @@ def retrieve_image_binary(rid, original_request, url):
     except urllib.error.URLError as e:
         print(f'[!] [{rid}] URLError: {e.reason}')
         abort(500)
-    except error as ex:
+    except os.error as ex:
         print(f'[!] [{rid}] Retrieve error: {ex}')
     return False
 
@@ -137,6 +180,7 @@ def denoise_image(rid, image, denoiser, sigma):
     elapsed_time = time.time() - start_time
     print(f'[+] [{rid}] Denoised image {[*image.shape]}->{[*denoised_image.shape]} in {elapsed_time:.2f} seconds.')
     return denoised_image
+
 
 def colorize_image(rid, image, colorizer, size):
     start_time = time.time()
@@ -151,24 +195,24 @@ def upscale_image(rid, image, upscaler, factor):
     start_time = time.time()
     upscaled_image = upscaler.upscale((image.astype('float32') / 255), factor)
     elapsed_time = time.time() - start_time
-    print(f'[+] [{rid}] Upscaled image (x{factor}) {[*image.shape]}->{[*upscaled_image.shape]} in {elapsed_time:.2f} seconds.')
+    print(
+        f'[+] [{rid}] Upscaled image (x{factor}) {[*image.shape]}->{[*upscaled_image.shape]} in {elapsed_time:.2f} seconds.')
     return upscaled_image
-
-
 
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Run Flask app with optional SSL context.')
     parser.add_argument('--device', choices=['cpu', 'cuda'], default='cuda', help='Device to use')
 
-    parser.add_argument('--colorizer_path', default ='networks/generator.zip')
-    parser.add_argument('--extractor_path', default ='networks/extractor.pth')
+    parser.add_argument('--colorizer_path', default='networks/generator.zip')
+    parser.add_argument('--extractor_path', default='networks/extractor.pth')
     parser.add_argument('--upscaler_path', default='networks/RealESRGAN_x4plus_anime_6B.pt')
 
     parser.add_argument('--no-ssl', dest='ssl', action='store_false', default=True, help='Disable SSL context.')
     parser.add_argument('--no-upscale', dest='upscale', action='store_false', default=True, help='Disable upscaling')
-    parser.add_argument('--no-colorize', dest='colorize', action='store_false', default=True, help = 'Disable colorization')
-    parser.add_argument('--no-denoise', dest='denoise', action='store_false', default=True, help = 'Disable denoiser')
+    parser.add_argument('--no-colorize', dest='colorize', action='store_false', default=True,
+                        help='Disable colorization')
+    parser.add_argument('--no-denoise', dest='denoise', action='store_false', default=True, help='Disable denoiser')
     parser.add_argument('--upscale_factor', choices=[2, 4], default=4, type=int, help='Upscale by x2 or x4')
     parser.add_argument('--denoise_sigma', default=25, type=int, help='How much noise to expect from the image')
 
@@ -178,6 +222,7 @@ if __name__ == '__main__':
     config.colorizer_tile_size = 0
     config.tile_pad = 8
     config.colorized_image_size = 576  # Width
+    config.cache_root = 'manga'
 
     colorizer = MangaColorizator(config) if config.colorize else None
     upscaler = MangaUpscaler(config) if config.upscale else None
@@ -188,4 +233,3 @@ if __name__ == '__main__':
         app.run(host='0.0.0.0', port=5000, ssl_context=context)
     else:
         app.run(host='0.0.0.0', port=5000)
-

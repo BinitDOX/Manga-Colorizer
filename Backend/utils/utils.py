@@ -8,7 +8,7 @@ import numpy as np
 import cv2
 import torch
 from matplotlib import pyplot as plt
-import PIL.ImageChops, PIL.ImageOps
+import PIL.ImageChops, PIL.ImageOps, PIL.Image
 
 
 def resize_pad(img, size = 256):
@@ -53,13 +53,18 @@ def resize_pad(img, size = 256):
 
     return img[:, :, :1], pad
 
-def img_to_base64_str(img):
+def image_to_base64(img, format="WEBP"):
     buffered = io.BytesIO()
-    plt.imsave(buffered, img, format="PNG")
+    img = PIL.Image.fromarray(img)
+    img.save(buffered, format=format)
     buffered.seek(0)
     img_byte = buffered.getvalue()
-    return "data:image/png;base64," + base64.b64encode(img_byte).decode('utf-8')
+    return f"data:image/{format.lower()};base64," + base64.b64encode(img_byte).decode('utf-8')
 
+def load_image_as_base64(filepath, format="WEBP"):
+    with open(filepath, "rb") as img_file:
+        img_byte = img_file.read()
+    return f"data:image/{format.lower()};base64," + base64.b64encode(img_byte).decode('utf-8')
 
 def distance_from_grayscale(image):
     """
