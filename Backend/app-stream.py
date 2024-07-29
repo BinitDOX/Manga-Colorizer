@@ -14,7 +14,9 @@ from flask_cors import CORS
 from denoisator import MangaDenoiser
 from colorizator import MangaColorizator
 from upscalator import MangaUpscaler
-from utils.utils import distance_from_grayscale, generate_random_id, image_to_base64, load_image_as_base64
+from utils.utils import distance_from_grayscale, generate_random_id,\
+    image_to_base64, load_image_as_base64, save_image, sanitize_string
+
 
 app = Flask(__name__)
 CORS(app, resources={r"/*": {"origins": "*"}})
@@ -39,10 +41,10 @@ def colorize_image_data():
         denoise = req_json.get('denoise', config.denoise)
         denoise_sigma = req_json.get('denoiseSigma', config.denoise_sigma)
         upscale_factor = req_json.get('upscaleFactor', config.upscale_factor)
-        cache = req_json.get('mangaTitle', False)
+        cache = req_json.get('cache', False)
         manga_title = req_json.get('mangaTitle', '')
         manga_chapter = req_json.get('mangaChapter', '')
-        manga_page = req_json.get('mangaPage', '')
+        # manga_page = req_json.get('mangaPage', '')
 
         if denoise_sigma < 0:
             print(f'[-] [{rid}] Denoiser sigma ({denoise_sigma}) cannot be negative, using default')
@@ -56,10 +58,10 @@ def colorize_image_data():
         check_model_availability(rid, upscale, config.upscale, 'upscale')
         check_model_availability(rid, denoise, config.denoise, 'denoise')
 
-        if manga_title and manga_chapter and manga_page:
-            print(f'[+] [{rid}] Detected manga: {manga_title} >> {manga_chapter} >> {manga_page}')
+        if manga_title and manga_chapter:
+            print(f'[+] [{rid}] Detected manga: {manga_title} >> {manga_chapter}')
             if cache and not rid in img_name:
-                cached_image = load_from_cache(manga_title, manga_chapter, manga_page)
+                cached_image = load_from_cache(manga_title, manga_chapter, img_name)
                 if cached_image:
                     print(f'[+] [{rid}] Retrieving cached image')
                     return jsonify({'colorImgData': cached_image})
@@ -105,13 +107,13 @@ def colorize_image_data():
 
         if cache:
             try:
-                if manga_title and manga_chapter and manga_page and rid not in img_name:
-                    save_to_cache(manga_title, manga_chapter, manga_page, image)
-                    print(f'[+] Imaged cached')
+                if manga_title and manga_chapter and rid not in img_name:
+                    save_to_cache(manga_title, manga_chapter, img_name, image)
+                    print(f'[+] [{rid}] Imaged cached')
                 else:
-                    print(f'[-] Caching enabled, but manga details could not be detected, skipping')
+                    print(f'[-] [{rid}] Caching enabled, but manga details could not be detected, skipping')
             except Exception as te:
-                print(f'[-] Error while cacheing: {te}')
+                print(f'[-] [{rid}] Error while cacheing: {te}')
 
         result_image_data64 = image_to_base64(image)
         return jsonify({'colorImgData': result_image_data64})
@@ -123,21 +125,21 @@ def colorize_image_data():
     return response
 
 
-def get_cache_filename(manga_title, manga_chapter, manga_page, image_name):
-    title_dir = os.path.join(config.cache_root.strip().replace(' ', '_'), manga_title.strip().replace(' ', '_'))
-    chapter_dir = os.path.join(title_dir, manga_chapter.strip().replace(' ', '_'))
-    filename = f"{manga_page.strip().replace(' ', '_')}_{image_name.strip().replace(' ', '_')}.webp"
+def get_cache_filename(manga_title, manga_chapter, image_name):
+    title_dir = os.path.join(config.cache_root.strip().replace(' ', '_'), sanitize_string(manga_title.strip()))
+    chapter_dir = os.path.join(title_dir, sanitize_string(manga_chapter.strip()))
+    filename = f"{sanitize_string(image_name.strip())}.webp"
     return os.path.join(chapter_dir, filename)
 
 
-def save_to_cache(manga_title, manga_chapter, manga_page, image):
-    cache_filename = get_cache_filename(manga_title, manga_chapter, manga_page)
+def save_to_cache(manga_title, manga_chapter, image_name, image):
+    cache_filename = get_cache_filename(manga_title, manga_chapter, image_name)
     os.makedirs(os.path.dirname(cache_filename), exist_ok=True)
-    image.save(cache_filename, format="WEBP")
+    save_image(image, cache_filename)
 
 
-def load_from_cache(manga_title, manga_chapter, manga_page):
-    cache_filename = get_cache_filename(manga_title, manga_chapter, manga_page)
+def load_from_cache(manga_title, manga_chapter, image_name):
+    cache_filename = get_cache_filename(manga_title, manga_chapter, image_name)
     if os.path.exists(cache_filename):
         return load_image_as_base64(cache_filename)
     return None
@@ -152,6 +154,9 @@ def retrieve_image_binary(rid, original_request, url):
     user_agent = original_request.headers.get('User-Agent', '')
     referer = request.referrer if request.referrer else ''
     origin = request.origin if request.origin else ''
+
+    referer = referer if referer else origin
+    origin = origin if origin else referer
 
     headers = {
         'User-Agent': user_agent,

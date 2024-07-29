@@ -11,6 +11,7 @@ if (window.injectedMC !== 1) {
     var colorStride = 4; // When checking for an already-colored image,
                          // skip this many rows and columns at edges and between pixels.
                          // Check every pixel for color if zero.
+    var cache = false
     var denoise = true
     var colorize = true
     var upscale = true
@@ -46,6 +47,12 @@ if (window.injectedMC !== 1) {
             chapterSelector: 'p.reader-header-title-2',
             getTitle: (document) => document.querySelector(siteConfigurations['fanfox.net'].titleSelector)?.innerText,
             getChapter: (document) => document.querySelector(siteConfigurations['fanfox.net'].chapterSelector)?.innerText,
+        },
+        'mangakakalot.com' : {
+            titleSelector: 'div.breadcrumb span[itemprop=name]',
+            chapterSelector: 'div.breadcrumb span[itemprop=name]',
+            getTitle: (document) => document.querySelectorAll(siteConfigurations['mangakakalot.com'].titleSelector)?.[1]?.innerText,
+            getChapter: (document) => document.querySelectorAll(siteConfigurations['mangakakalot.com'].chapterSelector)?.[2]?.innerText,
         }
     };
 
@@ -134,6 +141,7 @@ if (window.injectedMC !== 1) {
                 imgName: imgName,
                 imgWidth: img.width,
 				imgHeight: img.height,
+				cache: cache,
 				denoise: denoise,
 				colorize: colorize,
 				upscale: upscale,
@@ -141,7 +149,7 @@ if (window.injectedMC !== 1) {
 				upscaleFactor: Number(upscaleFactor),
 
 				mangaTitle: mangaProps.title,
-				mangeChapter: mangaProps.chapter,
+				mangaChapter: mangaProps.chapter,
 				mangaPage: mangaProps.page.toString()
             }
             if (canSendData)
@@ -188,11 +196,12 @@ if (window.injectedMC !== 1) {
 
     const colorizeMangaEventHandler = (event=null) => {
         try {
-            chrome.storage.local.get(["apiURL", "maxActiveFetches", "denoise", "colorize", "upscale", "denoiseSigma", "upscaleFactor",
+            chrome.storage.local.get(["apiURL", "maxActiveFetches", "cache", "denoise", "colorize", "upscale", "denoiseSigma", "upscaleFactor",
                 "colorTolerance", "colorStride", "minImgHeight", "minImgHeight"], (result) => {
                 const apiURL = result.apiURL;
                 if (apiURL) {
                     maxActiveFetches = Number(result.maxActiveFetches || "1")
+                    cache = result.cache
                     denoise = result.denoise
                     colorize = result.colorize
                     upscale = result.upscale
@@ -211,9 +220,7 @@ if (window.injectedMC !== 1) {
                     const title = site ? (siteConfigurations[site].getTitle(document) || '') : '';
                     const chapter = site ? (siteConfigurations[site].getChapter(document) || '') : '';
 
-                    console.log(title, chapter)
-                    return;
-
+                    console.log(`[MC] Website: ${site} Title: ${title} Chapter: ${chapter}`)
                     console.log('[MC] Scanning images...')
 
                     let total = 0;
@@ -235,7 +242,7 @@ if (window.injectedMC !== 1) {
                         } else if (img.width > 0 && img.width < minImgWidth || img.height > 0 && img.height < minImgHeight) {
                             skipped++
                         } else {
-                            mangaProps = {title: title, chapter: chapter, page: index}
+                            const mangaProps = {title: title, chapter: chapter, page: index}
                             let status = colorizeImg(img, apiURL, colorStride, mangaProps);
                             switch(status){
                                 case 0: failed++; break;

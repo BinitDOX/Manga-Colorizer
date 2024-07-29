@@ -1,4 +1,6 @@
 const urlInput = document.getElementById("url-input-field");
+const maxActiveFetches = document.getElementById("maxactivefetches-input-field");
+const cacheCheckbox = document.getElementById("cache-checkbox");
 const denoiseCheckbox = document.getElementById("denoiser-checkbox");
 const colorizeCheckbox = document.getElementById("colorizer-checkbox");
 const upscaleCheckbox = document.getElementById("upscaler-checkbox");
@@ -13,9 +15,11 @@ const addSiteButton = document.getElementById("addsite");
 const runButton = document.getElementById("run");
 const testApiButton = document.getElementById("test-api");
 
-browser.storage.local.get(["apiURL", "denoise", "colorize", "upscale", "denoiseSigma", "upscaleFactor",
+browser.storage.local.get(["apiURL", "maxActiveFetches", "cache", "denoise", "colorize", "upscale", "denoiseSigma", "upscaleFactor",
                 "colorTolerance", "colorStride", "websites"], (result) => {
     urlInput.value = result.apiURL || "";
+    maxActiveFetches.value = result.maxActiveFetches || "1";
+    cacheCheckbox.checked = result.cache !== undefined ? result.cache : false;
     denoiseCheckbox.checked = result.denoise !== undefined ? result.denoise : true;
     colorizeCheckbox.checked = result.colorize !== undefined ? result.colorize : true;
     upscaleCheckbox.checked = result.upscale !== undefined ? result.upscale : true;
@@ -52,7 +56,6 @@ browser.storage.local.get(["apiURL", "denoise", "colorize", "upscale", "denoiseS
     });
 });
 
-
 testApiButton.addEventListener("click",() => {
     browser.tabs.create({url: urlInput.value, active: true});
     browser.storage.local.set({
@@ -70,6 +73,8 @@ runButton.addEventListener("click",() => {
 
     browser.storage.local.set({
         apiURL: urlInput.value.trim(),
+        maxActiveFetches: maxActiveFetches.value.trim(),
+        cache: cacheCheckbox.checked,
         denoise: denoiseCheckbox.checked,
         colorize: colorizeCheckbox.checked,
         upscale: upscaleCheckbox.checked,

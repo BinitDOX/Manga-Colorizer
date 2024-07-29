@@ -2,6 +2,7 @@ import base64
 import io
 import math
 import random
+import re
 import string
 
 import numpy as np
@@ -65,6 +66,14 @@ def load_image_as_base64(filepath, format="WEBP"):
     with open(filepath, "rb") as img_file:
         img_byte = img_file.read()
     return f"data:image/{format.lower()};base64," + base64.b64encode(img_byte).decode('utf-8')
+
+def save_image(image, filename, format="WEBP"):
+    image_pil = PIL.Image.fromarray(image)
+    image_pil.save(filename, format=format)
+
+def sanitize_string(input_string):
+    sanitized_string = re.sub(r'[^\w]', '_', input_string)
+    return sanitized_string
 
 def distance_from_grayscale(image):
     """
