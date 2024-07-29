@@ -92,8 +92,8 @@ def generate_random_id(length=8):
     random_id = ''.join(random.choices(characters, k=length))
     return random_id
 
-def save_image(image, filename):
-    plt.imsave(filename, image, format="PNG")
+def clear_torch_cache():
+    torch.cuda.empty_cache()
 
 def tile_process(model, img, scale, tile_size, tile_pad):
     if scale == 2: print('[-] ScaleFactor=2 is broken, please do not use it yet')

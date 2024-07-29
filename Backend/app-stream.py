@@ -5,6 +5,7 @@ import time
 import urllib.error
 import urllib.request
 import os
+import gc
 
 import PIL.Image
 import numpy as np
@@ -14,9 +15,8 @@ from flask_cors import CORS
 from denoisator import MangaDenoiser
 from colorizator import MangaColorizator
 from upscalator import MangaUpscaler
-from utils.utils import distance_from_grayscale, generate_random_id,\
-    image_to_base64, load_image_as_base64, save_image, sanitize_string
-
+from utils.utils import distance_from_grayscale, generate_random_id, \
+    image_to_base64, load_image_as_base64, save_image, sanitize_string, clear_torch_cache
 
 app = Flask(__name__)
 CORS(app, resources={r"/*": {"origins": "*"}})
@@ -120,10 +120,23 @@ def colorize_image_data():
 
     except RuntimeError as e:
         print(f'[!] [{rid}] Error: {e}')
+        handle_cuda_error(e)
 
     response = jsonify({'msg': f'Image: {img_name}, Error: Unable to colorize'})
     return response
 
+
+def handle_cuda_error(e):
+    global colorizer, upscaler, denoiser
+
+    if 'CUDA error: an illegal memory access was encountered' \
+        in str(e) or 'CUDA out of memory' in str(e):
+        del colorizer
+        del upscaler
+        del denoiser
+        clear_torch_cache()
+        gc.collect()
+        initialize_components()
 
 def get_cache_filename(manga_title, manga_chapter, image_name):
     title_dir = os.path.join(config.cache_root.strip().replace(' ', '_'), sanitize_string(manga_title.strip()))
@@ -200,13 +213,25 @@ def upscale_image(rid, image, upscaler, factor):
     start_time = time.time()
     upscaled_image = upscaler.upscale((image.astype('float32') / 255), factor)
     elapsed_time = time.time() - start_time
-    print(
-        f'[+] [{rid}] Upscaled image (x{factor}) {[*image.shape]}->{[*upscaled_image.shape]} in {elapsed_time:.2f} seconds.')
+    print(f'[+] [{rid}] Upscaled image (x{factor}) {[*image.shape]}->{[*upscaled_image.shape]} in {elapsed_time:.2f} seconds.')
     return upscaled_image
 
 
+config = None
+colorizer = None
+upscaler = None
+denoiser = None
+
+def initialize_components():
+    global colorizer, upscaler, denoiser
+
+    colorizer = MangaColorizator(config) if config.colorize else None
+    upscaler = MangaUpscaler(config) if config.upscale else None
+    denoiser = MangaDenoiser(config) if config.denoise else None
+    print(f'[+] Components initialized')
+
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description='Run Flask app with optional SSL context.')
+    parser = argparse.ArgumentParser(description='Run Manga Colorizer server')
     parser.add_argument('--device', choices=['cpu', 'cuda'], default='cuda', help='Device to use')
 
     parser.add_argument('--colorizer_path', default='networks/generator.zip')
@@ -229,9 +254,7 @@ if __name__ == '__main__':
     config.colorized_image_size = 576  # Width
     config.cache_root = 'manga'
 
-    colorizer = MangaColorizator(config) if config.colorize else None
-    upscaler = MangaUpscaler(config) if config.upscale else None
-    denoiser = MangaDenoiser(config) if config.denoise else None
+    initialize_components()
 
     if config.ssl:
         context = ('ssl/server.crt', 'ssl/server.key')
