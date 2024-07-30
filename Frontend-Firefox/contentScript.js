@@ -18,43 +18,61 @@ if (window.injectedMC !== 1) {
     var upscaleFactor = 4  // Image upscale factor x2 or x4
     var denoiseSigma = 25  // Expected noise in image
 
+    var siteConfigFile = 'siteConfig.json'
+    let siteConfigurations = null;
+
+    function fetchSiteConfigurations() {
+        return fetch(browser.runtime.getURL(siteConfigFile))
+            .then(response => response.json());
+    }
+    fetchSiteConfigurations().then(config => {
+        siteConfigurations = config
+        console.log('[MC] Sites configuration loaded')
+    });
+
     String.prototype.rsplit = function(sep, maxsplit) {
         const split = this.split(sep);
         return maxsplit ? [ split.slice(0, -maxsplit).join(sep) ].concat(split.slice(-maxsplit)) : split;
     }
 
-    const siteConfigurations = {
-        'mangadex.org': {
-            titleSelector: 'a[data-v-5d3b2210]',
-            chapterSelector: 'div#chapter-selector span[data-v-d2fabe5b]',
-            getTitle: (document) => document.querySelector(siteConfigurations['mangadex.org'].titleSelector)?.innerText,
-            getChapter: (document) => document.querySelector(siteConfigurations['mangadex.org'].chapterSelector)?.innerText,
-        },
-        'senkuro.com': {
-            titleSelector: 'p.nav-reader-caption__desktop',
-            chapterSelector: 'p.nav-reader-caption__mobile',
-            getTitle: (document) => document.querySelector(siteConfigurations['senkuro.com'].titleSelector)?.innerText,
-            getChapter: (document) => document.querySelector(siteConfigurations['senkuro.com'].chapterSelector)?.innerText,
-        },
-        'chapmanganelo.com': {
-            titleSelector: 'div.panel-breadcrumb a[title]',
-            chapterSelector: 'div.panel-breadcrumb a[title]',
-            getTitle: (document) => document.querySelectorAll(siteConfigurations['chapmanganelo.com'].titleSelector)?.[1]?.innerText,
-            getChapter: (document) => document.querySelectorAll(siteConfigurations['chapmanganelo.com'].chapterSelector)?.[2]?.innerText,
-        },
-        'fanfox.net' : {
-            titleSelector: 'p.reader-header-title-1 a[href]',
-            chapterSelector: 'p.reader-header-title-2',
-            getTitle: (document) => document.querySelector(siteConfigurations['fanfox.net'].titleSelector)?.innerText,
-            getChapter: (document) => document.querySelector(siteConfigurations['fanfox.net'].chapterSelector)?.innerText,
-        },
-        'mangakakalot.com' : {
-            titleSelector: 'div.breadcrumb span[itemprop=name]',
-            chapterSelector: 'div.breadcrumb span[itemprop=name]',
-            getTitle: (document) => document.querySelectorAll(siteConfigurations['mangakakalot.com'].titleSelector)?.[1]?.innerText,
-            getChapter: (document) => document.querySelectorAll(siteConfigurations['mangakakalot.com'].chapterSelector)?.[2]?.innerText,
+
+    function parseQuery(queryString, doc = document) {
+        queryString = queryString.trim();
+
+        const querySelectorRegex = /^document\.querySelector(All)?\(['"](.+?)['"]\)/;
+        const indexRegex = /\[(\d+)\]/;
+        const propertyRegex = /\.(innerText|innerHTML|textContent)$/;
+
+        let queryResult = null;
+
+        try {
+            const selectorMatch = queryString.match(querySelectorRegex);
+            if (!selectorMatch) throw new Error('Invalid selector format');
+            const isAll = Boolean(selectorMatch[1]);
+            const selector = selectorMatch[2];
+
+            queryResult = isAll ? doc.querySelectorAll(selector) : doc.querySelector(selector);
+
+            if (isAll) {
+                const indexMatch = queryString.match(indexRegex);
+                const index = indexMatch[1] !== undefined ? parseInt(indexMatch[1], 10) : 0;
+                queryResult = queryResult[index];
+            }
+
+            if (!queryResult) return '';
+
+            const propertyMatch = queryString.match(propertyRegex);
+            if (propertyMatch && propertyMatch[1]) {
+                return queryResult[propertyMatch[1]] || '';
+            } else {
+                return '';
+            }
+        } catch (error) {
+            console.error(`[MC] Error parsing query: ${queryString}`, error);
+            return '';
         }
-    };
+    }
+
 
     const maxDistFromGray = (ctx) => {
         const bpp = 4 // Bytes per pixel = number of channels (RGBA)
@@ -150,8 +168,10 @@ if (window.injectedMC !== 1) {
 
 				mangaTitle: mangaProps.title,
 				mangaChapter: mangaProps.chapter,
-				mangaPage: mangaProps.page.toString()
             }
+
+            console.log('[MC] Sending: ', postData)
+
             if (canSendData)
                 postData.imgData = imgContext.canvas.toDataURL("image/png");
             else
@@ -182,7 +202,8 @@ if (window.injectedMC !== 1) {
     const colorizeImg = (img, apiURL, colorStride, mangaProps) => {
         if (apiURL && (!imgSrcMatchesColoredSrc(img))) try {
             if (!img.complete) throw ('image not complete');
-            const imgName = (img.src || img.dataset?.src || '').rsplit('/', 1)[1];
+            const imageName = mangaProps.altText ? img.alt : ''
+            const imgName = imageName || (img.src || img.dataset?.src || '').rsplit('/', 1)[1];
             if (imgName) {
                 let imgContext = canvasContextFromImg(img);
                 return setColoredOrFetch(img, imgName, apiURL, colorStride, imgContext, mangaProps);
@@ -199,7 +220,7 @@ if (window.injectedMC !== 1) {
             browser.storage.local.get(["apiURL", "maxActiveFetches", "cache", "denoise", "colorize", "upscale", "denoiseSigma", "upscaleFactor",
                 "colorTolerance", "colorStride", "minImgHeight", "minImgHeight"], (result) => {
                 const apiURL = result.apiURL;
-                if (apiURL) {
+                if (apiURL && siteConfigurations) {
                     maxActiveFetches = Number(result.maxActiveFetches || "1")
                     cache = result.cache
                     denoise = result.denoise
@@ -217,10 +238,12 @@ if (window.injectedMC !== 1) {
                     if (storedColorStride > -1) colorStride = storedColorStride;
 
                     const site = Object.keys(siteConfigurations).find(site => window.location.hostname.includes(site));
-                    const title = site ? (siteConfigurations[site].getTitle(document) || '') : '';
-                    const chapter = site ? (siteConfigurations[site].getChapter(document) || '') : '';
+                    const config = siteConfigurations[site];
+                    const title = site ? parseQuery(config.titleQuery) : '';
+                    const chapter = site ? parseQuery(config.chapterQuery) : '';
+                    const pageNameFromAltText = site ? config.useAltTextAsImageName : false
 
-                    console.log(`[MC] Website: ${site} Title: ${title} Chapter: ${chapter}`)
+                    console.log(`[MC] Website: ${site}, Title: ${title}, Chapter: ${chapter}`)
                     console.log('[MC] Scanning images...')
 
                     let total = 0;
@@ -242,7 +265,7 @@ if (window.injectedMC !== 1) {
                         } else if (img.width > 0 && img.width < minImgWidth || img.height > 0 && img.height < minImgHeight) {
                             skipped++
                         } else {
-                            const mangaProps = {title: title, chapter: chapter, page: index}
+                            const mangaProps = {title: title, chapter: chapter, altText: pageNameFromAltText}
                             let status = colorizeImg(img, apiURL, colorStride, mangaProps);
                             switch(status){
                                 case 0: failed++; break;

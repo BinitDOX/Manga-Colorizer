@@ -5,6 +5,13 @@
   "permissions": ["activeTab", "scripting", "storage", "tabs"],
   "host_permissions": ["<all_urls>"],
 
+  "web_accessible_resources": [
+    {
+      "matches": ["<all_urls>"],
+      "resources": ["siteConfig.json"]
+    }
+  ],
+
   "action": {
     "default_icon": {
       "16": "assets/ext-icon.png",

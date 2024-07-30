@@ -19,7 +19,7 @@ if (window.injectedMC !== 1) {
     var denoiseSigma = 25  // Expected noise in image
 
     var siteConfigFile = 'siteConfig.json'
-    let siteConfigurations = {};
+    let siteConfigurations = null;
 
     function fetchSiteConfigurations() {
         return fetch(chrome.runtime.getURL(siteConfigFile))
@@ -27,6 +27,7 @@ if (window.injectedMC !== 1) {
     }
     fetchSiteConfigurations().then(config => {
         siteConfigurations = config
+        console.log('[MC] Sites configuration loaded')
     });
 
     String.prototype.rsplit = function(sep, maxsplit) {
@@ -36,10 +37,8 @@ if (window.injectedMC !== 1) {
 
 
     function parseQuery(queryString, doc = document) {
-        // Remove leading and trailing whitespaces
         queryString = queryString.trim();
 
-        // Regular expressions to match different parts of the query string
         const querySelectorRegex = /^document\.querySelector(All)?\(['"](.+?)['"]\)/;
         const indexRegex = /\[(\d+)\]/;
         const propertyRegex = /\.(innerText|innerHTML|textContent)$/;
@@ -47,36 +46,30 @@ if (window.injectedMC !== 1) {
         let queryResult = null;
 
         try {
-            // Match and extract the selector
             const selectorMatch = queryString.match(querySelectorRegex);
             if (!selectorMatch) throw new Error('Invalid selector format');
-            const isAll = Boolean(selectorMatch[1]); // Check if "All" is part of the query
+            const isAll = Boolean(selectorMatch[1]);
             const selector = selectorMatch[2];
 
-            // Get the elements using querySelector or querySelectorAll
             queryResult = isAll ? doc.querySelectorAll(selector) : doc.querySelector(selector);
 
-            // If querySelectorAll is used, extract the index if present
             if (isAll) {
                 const indexMatch = queryString.match(indexRegex);
-                console.log(indexMatch)
                 const index = indexMatch[1] !== undefined ? parseInt(indexMatch[1], 10) : 0;
                 queryResult = queryResult[index];
             }
 
-            // If the query result is null or undefined, return null
-            if (!queryResult) return null;
+            if (!queryResult) return '';
 
-            // Match and extract the property to access (innerText, innerHTML, or textContent)
             const propertyMatch = queryString.match(propertyRegex);
             if (propertyMatch && propertyMatch[1]) {
-                return queryResult[propertyMatch[1]] || null;
+                return queryResult[propertyMatch[1]] || '';
             } else {
-                return null;
+                return '';
             }
         } catch (error) {
-            console.error(`Error parsing query: ${queryString}`, error);
-            return null;
+            console.error(`[MC] Error parsing query: ${queryString}`, error);
+            return '';
         }
     }
 
@@ -227,7 +220,7 @@ if (window.injectedMC !== 1) {
             chrome.storage.local.get(["apiURL", "maxActiveFetches", "cache", "denoise", "colorize", "upscale", "denoiseSigma", "upscaleFactor",
                 "colorTolerance", "colorStride", "minImgHeight", "minImgHeight"], (result) => {
                 const apiURL = result.apiURL;
-                if (apiURL) {
+                if (apiURL && siteConfigurations) {
                     maxActiveFetches = Number(result.maxActiveFetches || "1")
                     cache = result.cache
                     denoise = result.denoise

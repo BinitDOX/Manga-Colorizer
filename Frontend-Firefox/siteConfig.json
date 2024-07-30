@@ -1,0 +1,42 @@
+{
+    "mangadex.org": {
+        "titleQuery": "document.querySelector('a[data-v-5d3b2210]')?.innerText",
+        "chapterQuery": "document.querySelector('div#chapter-selector span[data-v-d2fabe5b]')?.innerText",
+        "useAltTextAsImageName": true
+    },
+    "senkuro.com": {
+        "titleQuery": "document.querySelector('p.nav-reader-caption__desktop')?.innerText",
+        "chapterQuery": "document.querySelector('p.nav-reader-caption__mobile')?.innerText",
+        "useAltTextAsImageName": true
+    },
+    "chapmanganelo.com": {
+        "titleQuery": "document.querySelectorAll('div.panel-breadcrumb a[title]')?.[1]?.innerText",
+        "chapterQuery": "document.querySelectorAll('div.panel-breadcrumb a[title]')?.[2]?.innerText",
+        "useAltTextAsImageName": false
+    },
+    "fanfox.net": {
+        "titleQuery": "document.querySelector('p.reader-header-title-1 a[href]')?.innerText",
+        "chapterQuery": "document.querySelector('p.reader-header-title-2')?.innerText",
+        "useAltTextAsImageName": true
+    },
+    "mangakakalot.com": {
+        "titleQuery": "document.querySelectorAll('div.breadcrumb span[itemprop=name]')?.[1]?.innerText",
+        "chapterQuery": "document.querySelectorAll('div.breadcrumb span[itemprop=name]')?.[2]?.innerText",
+        "useAltTextAsImageName": false
+    },
+    "readmanga.io": {
+        "titleQuery": "document.querySelector('strong.mobile-title font[style] font[style]')?.innerHTML",
+        "chapterQuery": "document.querySelector('span.mobile-subtitle font[style] font[style]')?.innerHTML",
+        "useAltTextAsImageName": false
+    },
+    "manhuatop.org": {
+        "titleQuery": "document.querySelectorAll('ol.breadcrumb a')?.[1]?.innerHTML",
+        "chapterQuery": "document.querySelector('ol.breadcrumb li.active').innerHTML",
+        "useAltTextAsImageName": false
+    },
+    "manhuaus.com": {
+        "titleQuery": "document.querySelectorAll('ol.breadcrumb a')?.[1]?.innerHTML",
+        "chapterQuery": "document.querySelector('ol.breadcrumb li.active').innerHTML",
+        "useAltTextAsImageName": false
+    }
+}
