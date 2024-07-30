@@ -45,7 +45,6 @@ def colorize_image_data():
         cache = req_json.get('cache', False)
         manga_title = req_json.get('mangaTitle', '')
         manga_chapter = req_json.get('mangaChapter', '')
-        # manga_page = req_json.get('mangaPage', '')
 
         if denoise_sigma < 0:
             print(f'[-] [{rid}] Denoiser sigma ({denoise_sigma}) cannot be negative, using default')
