@@ -1,5 +1,7 @@
 const urlInput = document.getElementById("url-input-field");
 const maxActiveFetches = document.getElementById("maxactivefetches-input-field");
+const showOriginalCheckbox = document.getElementById("showoriginal-checkbox");
+const showColorizedCheckbox = document.getElementById("showcolorized-checkbox");
 const cacheCheckbox = document.getElementById("cache-checkbox");
 const denoiseCheckbox = document.getElementById("denoiser-checkbox");
 const colorizeCheckbox = document.getElementById("colorizer-checkbox");
@@ -15,10 +17,13 @@ const addSiteButton = document.getElementById("addsite");
 const runButton = document.getElementById("run");
 const testApiButton = document.getElementById("test-api");
 
-chrome.storage.local.get(["apiURL", "maxActiveFetches", "cache", "denoise", "colorize", "upscale", "denoiseSigma", "upscaleFactor",
+chrome.storage.local.get(["apiURL", "maxActiveFetches", "showOriginal", "showColorized", "cache", "denoise",
+                "colorize", "upscale", "denoiseSigma", "upscaleFactor",
                 "colorTolerance", "colorStride", "websites"], (result) => {
     urlInput.value = result.apiURL || "";
     maxActiveFetches.value = result.maxActiveFetches || "1";
+    showOriginalCheckbox.checked = result.showOriginal !== undefined ? result.showOriginal : false;
+    showColorizedCheckbox.checked = result.showColorized !== undefined ? result.showColorized : true;
     cacheCheckbox.checked = result.cache !== undefined ? result.cache : false;
     denoiseCheckbox.checked = result.denoise !== undefined ? result.denoise : true;
     colorizeCheckbox.checked = result.colorize !== undefined ? result.colorize : true;
@@ -33,7 +38,8 @@ chrome.storage.local.get(["apiURL", "maxActiveFetches", "cache", "denoise", "col
     denoiseSigmaInput.value = result.denoiseSigma || "25";
     colorToleranceInput.value = result.colorTolerance || "30";
     colorStrideInput.value = result.colorStride || "4";
-    websitesInput.value = result.websites || "mangadex.org/chapter\nchapmanganelo.com\nfanfox.net";
+    websitesInput.value = result.websites || "mangadex.org/chapter\nchapmanganelo.com\nfanfox.net" +
+                            "\nmangakakalot.com\nsenkuro.com\nreadmanga.io\nmanhuatop.org";
     const sitesArray = websitesInput.value.split("\n");
     websitesInput.rows = sitesArray.length + 1
     websitesInput.cols = sitesArray.reduce((len, str) => { return Math.max(len, str.length) }, 25);
@@ -56,6 +62,24 @@ chrome.storage.local.get(["apiURL", "maxActiveFetches", "cache", "denoise", "col
     });
 });
 
+function updateVisibility() {
+    const showOriginal = showOriginalCheckbox.checked;
+    const showColorized = showColorizedCheckbox.checked;
+
+    chrome.storage.local.set({
+        showOriginal: showOriginalCheckbox.checked,
+        showColorized: showColorizedCheckbox.checked,
+    });
+
+    chrome.tabs.query({active: true, currentWindow: true}, (tabs) => {
+        chrome.tabs.sendMessage(tabs[0].id, {
+            action: 'toggleVisibility',
+            showOriginal: showOriginal,
+            showColorized: showColorized
+        });
+    });
+}
+
 testApiButton.addEventListener("click",() => {
     chrome.tabs.create({url: urlInput.value, selected: true, active: true});
     chrome.storage.local.set({
@@ -74,6 +98,8 @@ runButton.addEventListener("click",() => {
     chrome.storage.local.set({
         apiURL: urlInput.value.trim(),
         maxActiveFetches: maxActiveFetches.value.trim(),
+        showOriginal: showOriginalCheckbox.checked,
+        showColorized: showColorizedCheckbox.checked,
         cache: cacheCheckbox.checked,
         denoise: denoiseCheckbox.checked,
         colorize: colorizeCheckbox.checked,
@@ -86,3 +112,6 @@ runButton.addEventListener("click",() => {
         currentTab: true,
     }); 
 })
+
+showOriginalCheckbox.addEventListener('change', updateVisibility);
+showColorizedCheckbox.addEventListener('change', updateVisibility);
