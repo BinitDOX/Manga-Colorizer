@@ -23,8 +23,6 @@ if (window.injectedMC !== 1) {
     var siteConfigFile = 'siteConfig.json'
     let siteConfigurations = null;
 
-    const observersMap = new WeakMap();
-
     function fetchSiteConfigurations() {
         return fetch(chrome.runtime.getURL(siteConfigFile))
             .then(response => response.json());
@@ -42,10 +40,11 @@ if (window.injectedMC !== 1) {
     function injectCSS() {
         const css = `
             .isHidden {
-                display: none;
+                display: none !important;
             }
         `;
         const style = document.createElement('style');
+        style.type = 'text/css';
         style.textContent = css;
         document.head.appendChild(style);
     }
@@ -56,17 +55,7 @@ if (window.injectedMC !== 1) {
         const clonedImages = document.querySelectorAll('img[data-is-cloned="true"][data-in-view="true"]');
 
         coloredImages.forEach(img => {
-            const observer = observersMap.get(img);
-            if (observer) {
-                observer.disconnect();
-            }
-
             showColorized ? img.classList.remove('isHidden') : img.classList.add('isHidden')
-
-            if (observer) {
-                observer.observe(img, { attributes: true, attributeFilter: ['style'] });
-                observer.observe(img.parentNode, { childList: true });
-            }
         });
 
         clonedImages.forEach(img => {
@@ -321,6 +310,7 @@ if (window.injectedMC !== 1) {
 
                     console.log(`[MC] Website: ${site}, Title: ${title}, Chapter: ${chapter}`)
                     console.log('[MC] Scanning images...')
+                    toggleImageVisibility(showOriginal, showColorized)
 
                     let total = 0;
                     let skipped = 0;
@@ -379,13 +369,6 @@ if (window.injectedMC !== 1) {
                     if (originalImg.style.display !== 'none'){
                         originalImg.dataset.inView = true
                         clonedImg.dataset.inView = true
-                        observer.disconnect();
-
-                        originalImg.style.display = !showColorized ? 'none' : originalImg.style.display
-                        clonedImg.style.display = !showOriginal ?  'none' : clonedImg.style.display
-
-                        observer.observe(originalImg, { attributes: true, attributeFilter: ['style'] });
-                        observer.observe(originalImg.parentNode, { childList: true });
                     } else if(originalImg.style.display === 'none'){
                         originalImg.dataset.inView = false
                         clonedImg.dataset.inView = false
@@ -407,7 +390,6 @@ if (window.injectedMC !== 1) {
         observer.observe(originalImg, { attributes: true, attributeFilter: ['style'] });
         observer.observe(originalImg.parentNode, { childList: true });
         originalImg._observer = observer;
-        observersMap.set(originalImg, observer);
     }
 
     colorizeMangaEventHandler();
@@ -419,6 +401,10 @@ if (window.injectedMC !== 1) {
         if (request.action === 'toggleVisibility') {
             console.log('[MC] Image visibility toggled')
             toggleImageVisibility(request.showOriginal, request.showColorized);
+        }
+        if (request.action === 'runColorizer'){
+            console.log('[MC] Running colorizer')
+            colorizeMangaEventHandler();
         }
         sendResponse({status: 'done'});
     });

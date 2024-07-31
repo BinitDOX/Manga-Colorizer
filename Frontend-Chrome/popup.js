@@ -110,7 +110,13 @@ runButton.addEventListener("click",() => {
         colorStride: colorStrideInput.value.trim(),
         websites: websitesInput.value.trim(),
         currentTab: true,
-    }); 
+    });
+
+    chrome.tabs.query({active: true, currentWindow: true}, (tabs) => {
+        chrome.tabs.sendMessage(tabs[0].id, {
+            action: 'runColorizer',
+        });
+    });
 })
 
 showOriginalCheckbox.addEventListener('change', updateVisibility);

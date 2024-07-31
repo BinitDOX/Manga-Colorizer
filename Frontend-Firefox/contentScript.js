@@ -2,7 +2,6 @@
 if (window.injectedMC !== 1) {
     window.injectedMC = 1;
     console.log('[MC] Starting context script');
-    const maxColoredSrc = 200; // Length of img.src to keep in img.coloredsrc
     var activeFetches = 0;
 
     var maxActiveFetches = 1;  // Number of images to request and process parallely
@@ -17,6 +16,9 @@ if (window.injectedMC !== 1) {
     var upscale = true
     var upscaleFactor = 4  // Image upscale factor x2 or x4
     var denoiseSigma = 25  // Expected noise in image
+
+    var showOriginal = false
+    var showColorized = true
 
     var siteConfigFile = 'siteConfig.json'
     let siteConfigurations = null;
@@ -35,6 +37,31 @@ if (window.injectedMC !== 1) {
         return maxsplit ? [ split.slice(0, -maxsplit).join(sep) ].concat(split.slice(-maxsplit)) : split;
     }
 
+    function injectCSS() {
+        const css = `
+            .isHidden {
+                display: none !important;
+            }
+        `;
+        const style = document.createElement('style');
+        style.type = 'text/css';
+        style.textContent = css;
+        document.head.appendChild(style);
+    }
+    injectCSS();
+
+    function toggleImageVisibility(showOriginal, showColorized) {
+        const coloredImages = document.querySelectorAll('img[data-is-colored="true"][data-in-view="true"]');
+        const clonedImages = document.querySelectorAll('img[data-is-cloned="true"][data-in-view="true"]');
+
+        coloredImages.forEach(img => {
+            showColorized ? img.classList.remove('isHidden') : img.classList.add('isHidden')
+        });
+
+        clonedImages.forEach(img => {
+            showOriginal ? img.classList.remove('isHidden') : img.classList.add('isHidden')
+        });
+    }
 
     function parseQuery(queryString, doc = document) {
         queryString = queryString.trim();
@@ -102,7 +129,8 @@ if (window.injectedMC !== 1) {
         return (colorTolerance < 255) && maxDistFromGray(ctx) > colorTolerance;
     }
 
-    async function fetchColorizedImg(url, options, img, imgName) {
+    // Backup code:
+    /*async function fetchColorizedImg(url, options, img, imgName) {
         console.log('[MC] Fetching: ', url, imgName);
         return fetch(url, options)
             .then(response => {
@@ -124,7 +152,45 @@ if (window.injectedMC !== 1) {
             .catch(error => {
                 console.log('[MC] Fetch error: ', error);
             });
+    }*/
+
+    async function fetchColorizedImg(url, options, img, imgName) {
+    console.log('[MC] Fetching: ', url, imgName);
+    return fetch(url, options)
+        .then(response => {
+            if (!response.ok)
+                return response.text().then(text => { throw text })
+            else
+                return response.json()
+        })
+        .then(json => {
+            if (json.msg)
+                console.log('[MC] Message: ', json.msg);
+            if (json.colorImgData) {
+                const imgClone = img.cloneNode(true);
+                img.dataset.isColored = true;
+                imgClone.dataset.isCloned = true;
+
+                img.src = json.colorImgData;
+                if (img.dataset?.src) img.dataset.src = '';
+                if (img.srcset) img.srcset = '';
+
+                img.parentNode.insertBefore(imgClone, img.nextSibling);
+
+                img.dataset.inView = img.style.display !== 'none'
+                imgClone.dataset.inView = imgClone.style.display !== 'none'
+
+                observeImageChanges(img, imgClone);
+
+                console.log('[MC] Processed: ', imgName);
+                toggleImageVisibility(showOriginal, showColorized)
+            }
+        })
+        .catch(error => {
+            console.log('[MC] Fetch error: ', error);
+        });
     }
+
 
     const canvasContextFromImg = (img) => {
         const imgCanvas = document.createElement("canvas");
@@ -140,7 +206,7 @@ if (window.injectedMC !== 1) {
         var canSendData = true;
         try {
             if (isColoredContext(imgContext, colorStride)) {
-                img.coloredsrc = img.src.slice(0, maxColoredSrc);
+                img.dataset.isColored = true;
                 console.log('[MC] Already colored: ', imgName);
                 return 1;
             }
@@ -154,7 +220,7 @@ if (window.injectedMC !== 1) {
 
         if (activeFetches < maxActiveFetches) {
             activeFetches += 1;
-            img.coloredsrc = img.src.slice(0, maxColoredSrc); // Assume already colored while fetch is in progress
+            img.dataset.isProcessed = true;
             const postData = {
                 imgName: imgName,
                 imgWidth: img.width,
@@ -188,7 +254,6 @@ if (window.injectedMC !== 1) {
             fetchColorizedImg(new URL('colorize-image-data', apiURL).toString(), options, img, imgName)
                 .finally(() => {
                     activeFetches -= 1;
-                    img.coloredsrc = img.src.slice(0, maxColoredSrc);
                     colorizeMangaEventHandler();
                 });
             return 3
@@ -197,11 +262,8 @@ if (window.injectedMC !== 1) {
         }
     }
 
-    const imgSrcMatchesColoredSrc = (img) => { return img.src.startsWith(img.coloredsrc)}
-
     const colorizeImg = (img, apiURL, colorStride, mangaProps) => {
-        if (apiURL && (!imgSrcMatchesColoredSrc(img))) try {
-            if (!img.complete) throw ('image not complete');
+        if (apiURL) try {
             const imageName = mangaProps.altText ? img.alt : ''
             const imgName = imageName || (img.src || img.dataset?.src || '').rsplit('/', 1)[1];
             if (imgName) {
@@ -217,11 +279,14 @@ if (window.injectedMC !== 1) {
 
     const colorizeMangaEventHandler = (event=null) => {
         try {
-            browser.storage.local.get(["apiURL", "maxActiveFetches", "cache", "denoise", "colorize", "upscale", "denoiseSigma", "upscaleFactor",
+            browser.storage.local.get(["apiURL", "maxActiveFetches", "showOriginal", "showColorized", "cache", "denoise", "colorize", "upscale", "denoiseSigma", "upscaleFactor",
                 "colorTolerance", "colorStride", "minImgHeight", "minImgHeight"], (result) => {
                 const apiURL = result.apiURL;
                 if (apiURL && siteConfigurations) {
                     maxActiveFetches = Number(result.maxActiveFetches || "1")
+                    showOriginal = result.showOriginal
+                    showColorized = result.showColorized
+
                     cache = result.cache
                     denoise = result.denoise
                     colorize = result.colorize
@@ -245,6 +310,7 @@ if (window.injectedMC !== 1) {
 
                     console.log(`[MC] Website: ${site}, Title: ${title}, Chapter: ${chapter}`)
                     console.log('[MC] Scanning images...')
+                    toggleImageVisibility(showOriginal, showColorized)
 
                     let total = 0;
                     let skipped = 0;
@@ -257,11 +323,15 @@ if (window.injectedMC !== 1) {
                     total= images.length;
 
                     images.forEach((img, index) => {
-                        if (imgSrcMatchesColoredSrc(img)) {
-                            colored++;
+                        if (img.dataset.isCloned) {
+                            return  // continue
+                        } else if (img.dataset.isColored) {
+                            colored++
+                        } else if(img.dataset.isProcessed && !img.dataset.isColored){
+                            failed++
                         } else if (!img.complete || !img.src) {
                             img.addEventListener('load', colorizeMangaEventHandler, { passive: true });
-                            skipped++
+                            total--
                         } else if (img.width > 0 && img.width < minImgWidth || img.height > 0 && img.height < minImgHeight) {
                             skipped++
                         } else {
@@ -289,8 +359,53 @@ if (window.injectedMC !== 1) {
         }
     }
 
+
+    function observeImageChanges(originalImg, clonedImg) {
+        const handleMutation = (mutationsList) => {
+            mutationsList.forEach((mutation) => {
+                if (mutation.type === 'attributes' && mutation.attributeName === 'style') {
+                    clonedImg.style.cssText = originalImg.style.cssText;
+
+                    if (originalImg.style.display !== 'none'){
+                        originalImg.dataset.inView = true
+                        clonedImg.dataset.inView = true
+                    } else if(originalImg.style.display === 'none'){
+                        originalImg.dataset.inView = false
+                        clonedImg.dataset.inView = false
+                    }
+                }
+
+                if (mutation.type === 'childList') {
+                    mutation.removedNodes.forEach((node) => {
+                        if (node === originalImg) {
+                            clonedImg.remove();
+                            observer.disconnect();
+                        }
+                    });
+                }
+            });
+        };
+
+        const observer = new MutationObserver(handleMutation);
+        observer.observe(originalImg, { attributes: true, attributeFilter: ['style'] });
+        observer.observe(originalImg.parentNode, { childList: true });
+        originalImg._observer = observer;
+    }
+
     colorizeMangaEventHandler();
 
     const observer = new MutationObserver(colorizeMangaEventHandler);
     observer.observe(document.querySelector("body"), { subtree: true, childList: true });
+
+    browser.runtime.onMessage.addListener((request, sender, sendResponse) => {
+        if (request.action === 'toggleVisibility') {
+            console.log('[MC] Image visibility toggled')
+            toggleImageVisibility(request.showOriginal, request.showColorized);
+        }
+        if (request.action === 'runColorizer'){
+            console.log('[MC] Running colorizer')
+            colorizeMangaEventHandler();
+        }
+        sendResponse({status: 'done'});
+    });
 };
