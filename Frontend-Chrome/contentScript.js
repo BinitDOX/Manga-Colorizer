@@ -2,27 +2,29 @@
 if (window.injectedMC !== 1) {
     window.injectedMC = 1;
     console.log('[MC] Starting context script');
+
+    // Dynamic private variables
     var activeFetches = 0;
 
+    // Configuration variables
     var maxActiveFetches = 1;  // Number of images to request and process parallely
-    var colorTolerance = 30;  // If difference between red, blue, and green values is greater than this for any pixel,
-                      // image is assumed to be in color and will not be recolored.
-    var colorStride = 4; // When checking for an already-colored image,
-                         // skip this many rows and columns at edges and between pixels.
-                         // Check every pixel for color if zero.
-    var cache = false
-    var denoise = true
-    var colorize = true
-    var upscale = true
+    var colorTolerance = 30;  // MSE Cutoff check for an already-colored image
+    var colorStride = 4;  // Skip every this many rows and columns pixels for MSE calculation
+
+    var cache = false  // Saves and gets images to and from server if site config set in siteConfig.json
+    var denoise = true  // Denoises (remove unnecessary details) the image before processing
+    var colorize = true  // Colorizes the image
+    var upscale = true  // Upscale the image using super-resolution
     var upscaleFactor = 4  // Image upscale factor x2 or x4
-    var denoiseSigma = 25  // Expected noise in image
+    var denoiseSigma = 25  // Expected noise in image, basically blur strength
 
-    var showOriginal = false
-    var showColorized = true
+    var showOriginal = false  // Shows original image, if processed (colorized)
+    var showColorized = true  // Shows processed image, if processed (colorized)
 
-    var siteConfigFile = 'siteConfig.json'
-    let siteConfigurations = null;
+    var siteConfigFile = 'siteConfig.json'  // Manga detail selector queries for organized caching
+    let siteConfigurations = null;  // siteConfig.json is loaded in this variable
 
+    // ---- Initialization functions ----
     function fetchSiteConfigurations() {
         return fetch(chrome.runtime.getURL(siteConfigFile))
             .then(response => response.json());
@@ -31,11 +33,6 @@ if (window.injectedMC !== 1) {
         siteConfigurations = config
         console.log('[MC] Sites configuration loaded')
     });
-
-    String.prototype.rsplit = function(sep, maxsplit) {
-        const split = this.split(sep);
-        return maxsplit ? [ split.slice(0, -maxsplit).join(sep) ].concat(split.slice(-maxsplit)) : split;
-    }
 
     function injectCSS() {
         const css = `
@@ -50,17 +47,11 @@ if (window.injectedMC !== 1) {
     }
     injectCSS();
 
-    function toggleImageVisibility(showOriginal, showColorized) {
-        const coloredImages = document.querySelectorAll('img[data-is-colored="true"][data-in-view="true"]');
-        const clonedImages = document.querySelectorAll('img[data-is-cloned="true"][data-in-view="true"]');
 
-        coloredImages.forEach(img => {
-            showColorized ? img.classList.remove('isHidden') : img.classList.add('isHidden')
-        });
-
-        clonedImages.forEach(img => {
-            showOriginal ? img.classList.remove('isHidden') : img.classList.add('isHidden')
-        });
+    // ---- Utility functions ----
+    String.prototype.rsplit = function(sep, maxSplit) {
+        const split = this.split(sep);
+        return maxSplit ? [ split.slice(0, -maxSplit).join(sep) ].concat(split.slice(-maxSplit)) : split;
     }
 
     function parseQuery(queryString, doc = document) {
@@ -101,7 +92,7 @@ if (window.injectedMC !== 1) {
     }
 
 
-    const maxDistFromGray = (ctx) => {
+    /*const maxDistFromGray = (ctx) => {
         const bpp = 4 // Bytes per pixel = number of channels (RGBA)
         const rows = ctx.canvas.height - colorStride * 2;
         const cols = ctx.canvas.width - colorStride * 2;
@@ -123,39 +114,73 @@ if (window.injectedMC !== 1) {
         }
         console.log('[MC] Max distance from gray: ', maxDist)
         return maxDist;
-    }
-
-    const isColoredContext = (ctx) => {
-        return (colorTolerance < 255) && maxDistFromGray(ctx) > colorTolerance;
-    }
-
-    // Backup code:
-    /*async function fetchColorizedImg(url, options, img, imgName) {
-        console.log('[MC] Fetching: ', url, imgName);
-        return fetch(url, options)
-            .then(response => {
-                if(!response.ok)
-                    return response.text().then(text => {throw text})
-                else
-                    return response.json()})
-            .then(json => {
-                if (json.msg)
-                    console.log('[MC] Message: ', json.msg);
-                if (json.colorImgData) {
-                    img.coloredsrc = json.colorImgData.slice(0, maxColoredSrc);
-                    img.src = json.colorImgData;
-                    if (img.dataset?.src) img.dataset.src = '';
-                    if (img.srcset) img.srcset = '';
-                    console.log('[MC] Processed: ', imgName);
-                }
-            })
-            .catch(error => {
-                console.log('[MC] Fetch error: ', error);
-            });
     }*/
 
-    async function fetchColorizedImg(url, options, img, imgName) {
-    console.log('[MC] Fetching: ', url, imgName);
+    const canvasContextFromImg = (img) => {
+        const imgCanvas = document.createElement("canvas");
+        imgCanvas.width = img.width;
+        imgCanvas.height = img.height;
+
+        const imgContext = imgCanvas.getContext("2d", { willReadFrequently: true });
+        imgContext.drawImage(img, 0, 0, imgCanvas.width, imgCanvas.height);
+        return imgContext
+    }
+
+    // ColorStride may be added in this, if needed
+    const isGrayscale = (index, ctx, adjustColorBias = true) => {
+        const thumbFactor = 4
+        const thumbWidth = Math.floor(ctx.canvas.width / thumbFactor)
+        const thumbHeight = Math.floor(ctx.canvas.height / thumbFactor)
+        const thumbCanvas = document.createElement('canvas');
+        const thumbCtx = thumbCanvas.getContext('2d');
+        thumbCanvas.width = thumbWidth;
+        thumbCanvas.height = thumbHeight;
+        thumbCtx.drawImage(ctx.canvas, 0, 0, thumbWidth, thumbHeight);
+
+        const imageData = thumbCtx.getImageData(0, 0, thumbWidth, thumbHeight);
+        const data = imageData.data;
+        let bias = [0, 0, 0];
+        if (adjustColorBias) {
+            let sumR = 0, sumG = 0, sumB = 0;
+            for (let i = 0; i < data.length; i += 4) {
+                sumR += data[i];
+                sumG += data[i + 1];
+                sumB += data[i + 2];
+            }
+            const meanR = sumR / (data.length / 4);
+            const meanG = sumG / (data.length / 4);
+            const meanB = sumB / (data.length / 4);
+            const overallMean = (meanR + meanG + meanB) / 3;
+            bias = [meanR - overallMean, meanG - overallMean, meanB - overallMean];
+        }
+
+        let SSE = 0;   // Sum of Squared Errors (SSE)
+        const width = thumbCanvas.width;
+        const height = thumbCanvas.height;
+        for (let y = 0; y < height; y += 1) {
+            for (let x = 0; x < width; x += 1) {
+                const index = (y * width + x) * 4;
+                const pixel = [data[index], data[index + 1], data[index + 2]];
+                const mu = (pixel[0] + pixel[1] + pixel[2]) / 3;
+                for (let j = 0; j < 3; j++) {
+                    const delta = pixel[j] - mu - bias[j];
+                    SSE += delta * delta;
+                }
+            }
+        }
+
+        // Mean Squared Error (MSE)
+        const totalPixels = (thumbWidth * thumbHeight);
+        const MSE = SSE / totalPixels;
+
+        console.log(`[MC] [${index}] MSE for grayscale check: ${MSE.toFixed(3)}`);
+        return MSE <= colorTolerance;
+    };
+
+
+    // ---- API functions and helpers ----
+    async function fetchColorizedImg(index, url, options, img, imgName) {
+    console.log(`[MC] [${index}] Fetching: ${imgName} ${url}`);
     return fetch(url, options)
         .then(response => {
             if (!response.ok)
@@ -165,7 +190,7 @@ if (window.injectedMC !== 1) {
         })
         .then(json => {
             if (json.msg)
-                console.log('[MC] Message: ', json.msg);
+                console.log(`[MC] [${index}] Message: ${json.msg}`);
             if (json.colorImgData) {
                 const imgClone = img.cloneNode(true);
                 img.dataset.isColored = true;
@@ -182,38 +207,27 @@ if (window.injectedMC !== 1) {
 
                 observeImageChanges(img, imgClone);
 
-                console.log('[MC] Processed: ', imgName);
+                console.log(`[MC] [${index}] Processed: ${imgName}`);
                 toggleImageVisibility(showOriginal, showColorized)
             }
         })
         .catch(error => {
-            console.log('[MC] Fetch error: ', error);
+            console.log(`[MC] [${index}] Fetch error: ${error}`);
         });
     }
 
-
-    const canvasContextFromImg = (img) => {
-        const imgCanvas = document.createElement("canvas");
-        imgCanvas.width = img.width;
-        imgCanvas.height = img.height;
-
-        const imgContext = imgCanvas.getContext("2d", { willReadFrequently: true });
-        imgContext.drawImage(img, 0, 0, imgCanvas.width, imgCanvas.height);
-        return imgContext
-    }
-
-    const setColoredOrFetch = (img, imgName, apiURL, colorStride, imgContext, mangaProps) => {
+    const setColoredOrFetch = (index, img, imgName, apiURL, colorStride, imgContext, mangaProps) => {
         var canSendData = true;
         try {
-            if (isColoredContext(imgContext, colorStride)) {
+            if (!isGrayscale(index, imgContext)) {
                 img.dataset.isColored = true;
-                console.log('[MC] Already colored: ', imgName);
+                console.log(`[MC] [${index}] Already colored: ${imgName}`);
                 return 1;
             }
         } catch(eIsColor) {
             canSendData = false
             if (!eIsColor.message.startsWith("Failed to execute 'getImageData'")) {
-                console.log('[MC] Colorized context error: ', eIsColor)
+                console.log(`[MC] [${index}] Colorized context error: ${eIsColor}`);
                 return 0;
             }
         }
@@ -236,7 +250,7 @@ if (window.injectedMC !== 1) {
 				mangaChapter: mangaProps.chapter,
             }
 
-            console.log('[MC] Sending: ', postData)
+            console.log(`[MC] [${index}] Sending: `, postData);
 
             if (canSendData)
                 postData.imgData = imgContext.canvas.toDataURL("image/png");
@@ -251,7 +265,7 @@ if (window.injectedMC !== 1) {
                 body: JSON.stringify(postData)
             };
 
-            fetchColorizedImg(new URL('colorize-image-data', apiURL).toString(), options, img, imgName)
+            fetchColorizedImg(index, new URL('colorize-image-data', apiURL).toString(), options, img, imgName)
                 .finally(() => {
                     activeFetches -= 1;
                     colorizeMangaEventHandler();
@@ -262,21 +276,23 @@ if (window.injectedMC !== 1) {
         }
     }
 
-    const colorizeImg = (img, apiURL, colorStride, mangaProps) => {
+    const colorizeImg = (index, img, apiURL, colorStride, mangaProps) => {
         if (apiURL) try {
             const imageName = mangaProps.altText ? img.alt : ''
             const imgName = imageName || (img.src || img.dataset?.src || '').rsplit('/', 1)[1];
             if (imgName) {
                 let imgContext = canvasContextFromImg(img);
-                return setColoredOrFetch(img, imgName, apiURL, colorStride, imgContext, mangaProps);
+                return setColoredOrFetch(index, img, imgName, apiURL, colorStride, imgContext, mangaProps);
             }
             return 0;
         } catch(e) {
-            console.log('[MC] Colorize image error: ', e)
+            console.log(`[MC] [${index}] Colorize image error: ${e}`)
             return 0;
         }
     }
 
+
+    // ---- Extension interface functions ----
     const colorizeMangaEventHandler = (event=null) => {
         try {
             chrome.storage.local.get(["apiURL", "maxActiveFetches", "showOriginal", "showColorized", "cache", "denoise", "colorize", "upscale", "denoiseSigma", "upscaleFactor",
@@ -336,7 +352,7 @@ if (window.injectedMC !== 1) {
                             skipped++
                         } else {
                             const mangaProps = {title: title, chapter: chapter, altText: pageNameFromAltText}
-                            let status = colorizeImg(img, apiURL, colorStride, mangaProps);
+                            let status = colorizeImg(index, img, apiURL, colorStride, mangaProps);
                             switch(status){
                                 case 0: failed++; break;
                                 case 1: colored++; break;
@@ -359,7 +375,33 @@ if (window.injectedMC !== 1) {
         }
     }
 
+    function toggleImageVisibility(showOriginal, showColorized) {
+        const coloredImages = document.querySelectorAll('img[data-is-colored="true"][data-in-view="true"]');
+        const clonedImages = document.querySelectorAll('img[data-is-cloned="true"][data-in-view="true"]');
 
+        coloredImages.forEach(img => {
+            showColorized ? img.classList.remove('isHidden') : img.classList.add('isHidden')
+        });
+
+        clonedImages.forEach(img => {
+            showOriginal ? img.classList.remove('isHidden') : img.classList.add('isHidden')
+        });
+    }
+
+    chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+        if (request.action === 'toggleVisibility') {
+            console.log('[MC] Image visibility toggled')
+            toggleImageVisibility(request.showOriginal, request.showColorized);
+        }
+        if (request.action === 'runColorizer'){
+            console.log('[MC] Running colorizer')
+            colorizeMangaEventHandler();
+        }
+        sendResponse({status: 'done'});
+    });
+
+
+    // ---- Observer functions ----
     function observeImageChanges(originalImg, clonedImg) {
         const handleMutation = (mutationsList) => {
             mutationsList.forEach((mutation) => {
@@ -396,16 +438,4 @@ if (window.injectedMC !== 1) {
 
     const observer = new MutationObserver(colorizeMangaEventHandler);
     observer.observe(document.querySelector("body"), { subtree: true, childList: true });
-
-    chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-        if (request.action === 'toggleVisibility') {
-            console.log('[MC] Image visibility toggled')
-            toggleImageVisibility(request.showOriginal, request.showColorized);
-        }
-        if (request.action === 'runColorizer'){
-            console.log('[MC] Running colorizer')
-            colorizeMangaEventHandler();
-        }
-        sendResponse({status: 'done'});
-    });
 };

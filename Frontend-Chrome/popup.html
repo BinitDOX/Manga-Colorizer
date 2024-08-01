@@ -55,15 +55,18 @@
     </div>
     <div class="settings-container">
       <label class="setting-label" for="denoisesigma-input-field">Denoise Sigma</label>
-      <input class="text-input" type="number" min="0" max="1000" id="denoisesigma-input-field" title="How much noise to expect from the images"/>
+      <input class="text-input" type="number" min="0" max="1000" id="denoisesigma-input-field" title="How much noise to
+        expect from the images (Blur strength)"/>
     </div>
     <div class="settings-container">
       <label class="setting-label" for="colortolerance-input-field">Color Tolerance</label>
-      <input class="text-input" type="number" min="0" max="255" id="colortolerance-input-field" title="Images with colors farther from gray than this will not be recolored"/>
+      <input class="text-input" type="number" id="colortolerance-input-field" title="This value sets the MSE threshold
+        for determining whether an image is considered grayscale or not."/>
     </div>
-    <div class="settings-container">
+    <div class="settings-container" style="display:none">
       <label class="setting-label" for="colorstride-input-field">Color Stride</label>
-      <input class="text-input" type="number" min="0" max="255" id="colorstride-input-field" title="Skip this many pixels at edges and between pixels when checking for color" />
+      <input class="text-input" type="number" min="0" max="255" id="colorstride-input-field" title="Skip this many
+        pixels at edges and between pixels when checking for color" />
     </div>
     <div class="settings-container">
       <label class="setting-label" for="websites-input-field">Manga Sites</label>

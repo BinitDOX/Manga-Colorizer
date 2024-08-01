@@ -1,6 +1,6 @@
 {
   "name": "Manga Colorizer",
-  "version": "0.4.2",
+  "version": "0.4.3",
   "description": "Colorize and/or upscale any Manga. May be used for any website with images",
   "permissions": ["activeTab", "scripting", "storage", "tabs"],
   "host_permissions": ["<all_urls>"],
