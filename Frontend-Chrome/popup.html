@@ -18,7 +18,7 @@
     </div>
     <div class="settings-container">
       <label class="setting-label" for="maxactivefetches-input-field">Parallel Processing</label>
-      <input class="text-input" type="number" min="0" max="10" id="maxactivefetches-input-field" title="How many images to process parallely"/>
+      <input class="text-input" type="number" min="0" max="10" id="maxactivefetches-input-field" title="Images to process parallely"/>
     </div>
     <div class="settings-container">
       <label class="setting-label" for="showoriginal-checkbox">Show Original</label>
@@ -55,13 +55,11 @@
     </div>
     <div class="settings-container">
       <label class="setting-label" for="denoisesigma-input-field">Denoise Sigma</label>
-      <input class="text-input" type="number" min="0" max="1000" id="denoisesigma-input-field" title="How much noise to
-        expect from the images (Blur strength)"/>
+      <input class="text-input" type="number" min="0" max="1000" id="denoisesigma-input-field" title="Noise to expect from the images (Blur strength)"/>
     </div>
     <div class="settings-container">
       <label class="setting-label" for="colortolerance-input-field">Color Tolerance</label>
-      <input class="text-input" type="number" id="colortolerance-input-field" title="This value sets the MSE threshold
-        for determining whether an image is considered grayscale or not."/>
+      <input class="text-input" type="number" min="-1" max="1000" id="colortolerance-input-field" title="The MSE threshold for determining whether an image is considered grayscale or not"/>
     </div>
     <div class="settings-container" style="display:none">
       <label class="setting-label" for="colorstride-input-field">Color Stride</label>

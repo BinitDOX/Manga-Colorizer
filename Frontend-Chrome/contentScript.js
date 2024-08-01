@@ -185,7 +185,8 @@ if (window.injectedMC !== 1) {
 
     // ---- API functions and helpers ----
     async function fetchColorizedImg(index, url, options, img, imgName) {
-    console.log(`[MC] [${index}] Fetching: ${imgName} ${url}`);
+    console.log(`[MC] [${index}] Fetching: ${imgName}`);
+    const savedSrc = img.src
     return fetch(url, options)
         .then(response => {
             if (!response.ok)
@@ -197,8 +198,14 @@ if (window.injectedMC !== 1) {
             if (json.msg)
                 console.log(`[MC] [${index}] Message: ${json.msg}`);
             if (json.colorImgData) {
+                if(img.src != savedSrc){
+                    console.log(`[MC] [${index}] Image src changed while request was in progress, invalidating...`)
+                    img.removeAttribute('data-is-processed')
+                    return;
+                }
                 const imgClone = img.cloneNode(true);
                 img.dataset.isColored = true;
+                img.dataset.isProcessed = true;
                 imgClone.dataset.isCloned = true;
 
                 img.src = json.colorImgData;
@@ -346,7 +353,7 @@ if (window.injectedMC !== 1) {
                     images.forEach((img, index) => {
                         if (img.dataset.isCloned) {
                             return  // continue
-                        } else if (img.dataset.isColored) {
+                        } else if (img.dataset.isProcessed && img.dataset.isColored) {
                             colored++
                         } else if(img.dataset.isProcessed && !img.dataset.isColored){
                             failed++
@@ -357,6 +364,8 @@ if (window.injectedMC !== 1) {
                             total--
                         } else if (img.width > 0 && img.width < minImgWidth || img.height > 0 && img.height < minImgHeight) {
                             skipped++
+                        } else if (activeFetches >= maxActiveFetches){
+                            awaited++
                         } else {
                             const mangaProps = {title: title, chapter: chapter, altText: pageNameFromAltText}
                             let status = colorizeImg(index, img, apiURL, colorStride, mangaProps);
