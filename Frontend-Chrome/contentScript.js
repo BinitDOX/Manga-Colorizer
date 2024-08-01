@@ -91,8 +91,7 @@ if (window.injectedMC !== 1) {
         }
     }
 
-
-    /*const maxDistFromGray = (ctx) => {
+    const maxDistFromGray = (index, ctx) => {
         const bpp = 4 // Bytes per pixel = number of channels (RGBA)
         const rows = ctx.canvas.height - colorStride * 2;
         const cols = ctx.canvas.width - colorStride * 2;
@@ -100,7 +99,7 @@ if (window.injectedMC !== 1) {
         const imageData = ctx.getImageData(colorStride, colorStride, cols, rows);
         const rowStride = colorStride + 1;
         const rowBytes = cols * bpp;
-        const pxStride = bpp * (colorStride + 1); 
+        const pxStride = bpp * (colorStride + 1);
         var maxDist = 0;
         for (let row = 0; row < rows; row += rowStride) {
             const rowStart = row * rowBytes;
@@ -112,9 +111,9 @@ if (window.injectedMC !== 1) {
                 maxDist = Math.max(Math.abs(red-blue), Math.abs(red-green), Math.abs(blue-green), maxDist)
             }
         }
-        console.log('[MC] Max distance from gray: ', maxDist)
+        console.log(`[MC] [${index}] Max distance from gray: ${maxDist}`);
         return maxDist;
-    }*/
+    }
 
     const canvasContextFromImg = (img) => {
         const imgCanvas = document.createElement("canvas");
@@ -135,9 +134,15 @@ if (window.injectedMC !== 1) {
         const thumbCtx = thumbCanvas.getContext('2d');
         thumbCanvas.width = thumbWidth;
         thumbCanvas.height = thumbHeight;
-        thumbCtx.drawImage(ctx.canvas, 0, 0, thumbWidth, thumbHeight);
 
-        const imageData = thumbCtx.getImageData(0, 0, thumbWidth, thumbHeight);
+        let imageData;
+        try {
+            thumbCtx.drawImage(ctx.canvas, 0, 0, thumbWidth, thumbHeight);
+            imageData = thumbCtx.getImageData(0, 0, thumbWidth, thumbHeight);
+        } catch (insecureError) {
+            console.log(`[MC] [${index}] isGrayscale check error: ${insecureError}, falling back to isColoredContext`);
+            return maxDistFromGray(index, ctx) < colorTolerance
+        }
         const data = imageData.data;
         let bias = [0, 0, 0];
         if (adjustColorBias) {
@@ -345,6 +350,8 @@ if (window.injectedMC !== 1) {
                             colored++
                         } else if(img.dataset.isProcessed && !img.dataset.isColored){
                             failed++
+                        } else if (img.dataset.isProcessed){
+                            processing++
                         } else if (!img.complete || !img.src) {
                             img.addEventListener('load', colorizeMangaEventHandler, { passive: true });
                             total--
@@ -417,6 +424,13 @@ if (window.injectedMC !== 1) {
                     }
                 }
 
+                if (mutation.type === 'attributes' && mutation.attributeName === 'src') {
+                    clonedImg.remove();
+                    originalImg.removeAttribute('data-is-processed')
+                    originalImg.removeAttribute('data-is-colored')
+                    colorizeMangaEventHandler()
+                }
+
                 if (mutation.type === 'childList') {
                     mutation.removedNodes.forEach((node) => {
                         if (node === originalImg) {
@@ -429,7 +443,7 @@ if (window.injectedMC !== 1) {
         };
 
         const observer = new MutationObserver(handleMutation);
-        observer.observe(originalImg, { attributes: true, attributeFilter: ['style'] });
+        observer.observe(originalImg, { attributes: true, attributeFilter: ['style', 'src'] });
         observer.observe(originalImg.parentNode, { childList: true });
         originalImg._observer = observer;
     }
