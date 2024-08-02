@@ -126,7 +126,7 @@ if (window.injectedMC !== 1) {
     }
 
     // ColorStride may be added in this, if needed
-    const isGrayscale = (index, ctx, adjustColorBias = true) => {
+    const grayscaleMSE = (index, ctx, adjustColorBias = true) => {
         const thumbFactor = 4
         const thumbWidth = Math.floor(ctx.canvas.width / thumbFactor)
         const thumbHeight = Math.floor(ctx.canvas.height / thumbFactor)
@@ -179,7 +179,7 @@ if (window.injectedMC !== 1) {
         const MSE = SSE / totalPixels;
 
         console.log(`[MC] [${index}] MSE for grayscale check: ${MSE.toFixed(3)}`);
-        return MSE <= colorTolerance;
+        return MSE;
     };
 
 
@@ -231,8 +231,12 @@ if (window.injectedMC !== 1) {
     const setColoredOrFetch = (index, img, imgName, apiURL, colorStride, imgContext, mangaProps) => {
         var canSendData = true;
         try {
-            if (!isGrayscale(index, imgContext)) {
+            const grayMse = grayscaleMSE(index, imgContext);
+            const grayDist = maxDistFromGray(index, imgContext);
+            const ct = colorTolerance;
+            if (grayMse >= ct*10 || (grayMse >= ct && grayDist!=0)) {
                 img.dataset.isColored = true;
+                img.dataset.isProcessed = true;
                 console.log(`[MC] [${index}] Already colored: ${imgName}`);
                 return 1;
             }
