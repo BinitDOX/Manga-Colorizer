@@ -19,6 +19,7 @@ from upscalator import MangaUpscaler
 from utils.utils import distance_from_grayscale, generate_random_id, \
     image_to_base64, load_image_as_base64, save_image, sanitize_string, clear_torch_cache
 
+
 app = Flask(__name__)
 CORS(app, resources={r"/*": {"origins": "*"}})
 
@@ -239,6 +240,7 @@ if __name__ == '__main__':
     parser.add_argument('--colorizer_path', default='networks/generator.zip')
     parser.add_argument('--extractor_path', default='networks/extractor.pth')
     parser.add_argument('--upscaler_path', default='networks/RealESRGAN_x4plus_anime_6B.pt')
+    parser.add_argument('--upscaler_type', choices=['ESRGAN', 'GigaGAN'], default='ESRGAN')
 
     parser.add_argument('--no-ssl', dest='ssl', action='store_false', default=True, help='Disable SSL context.')
     parser.add_argument('--no-upscale', dest='upscale', action='store_false', default=True, help='Disable upscaling')
