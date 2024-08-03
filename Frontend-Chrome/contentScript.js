@@ -250,6 +250,7 @@ if (window.injectedMC !== 1) {
             }
         }
 
+        var oc = overwriteCache && !img.src.includes('animation')  // Can be better
         if (activeFetches < maxActiveFetches) {
             activeFetches += 1;
             img.dataset.isProcessed = true;
@@ -259,7 +260,7 @@ if (window.injectedMC !== 1) {
                 imgWidth: img.width,
 				imgHeight: img.height,
 				cache: cache,
-				overwriteCache: overwriteCache,
+				overwriteCache: oc,
 				denoise: denoise,
 				colorize: colorize,
 				upscale: upscale,
