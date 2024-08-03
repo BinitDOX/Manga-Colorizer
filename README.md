@@ -74,10 +74,9 @@ TODO
 11. Press the 'Add ...' button to add the site to the list of Manga Sites, so it automatically colors images from now on.
 12. Press 'Colorize!' and enjoy!.
 13. These steps have to be repeated everytime firefox is started.
-14. You can use the published version here[TODO], but it may not be updated to latest version.
 
 
-## Client Usage Instructions | PC | Chrome/Brave/Any-Chromium [TODO]: 
+## Client Usage Instructions | PC | Chrome/Brave/Any-Chromium: 
 0. Open the server URL:
    - Use localhost (local-hosting) (https://127.0.0.1:5000) or,
    - Private IP (local-hosting) (Ex. https://x.x.x.x:5000) or,
@@ -96,7 +95,7 @@ TODO
 9. Press 'Colorize!' and enjoy!.
 
 
-## Client Usage Instructions | Android | Firefox Nightly [TODO]:
+## Client Usage Instructions | Android | Firefox Nightly:
 1. Install Firefox Nightly browser on android from google playstore.
 2. Open settings, scroll down and select 'About Firefox Nightly'.
 3. Keep Tapping on Firefox logo, until the Debug menu is enabled.
@@ -105,22 +104,25 @@ TODO
 6. Follow Step-0 of 'Client Usage Instructions | PC | Firefox' **but use either Private IP or ngrokURL**.
 7. Open any black-and-white mange page.
 8. Tap settings menu (3 dots), select Add-ons, select the colorizer extension.
-9. Input the server URL in the 'API URL' field, and go back.
-10. [TODO]
+9. Input the server URL in the 'API URL' field.
+10. Add the manga website in the list.
+11. Press 'Colorize!' and enjoy!.
 12. Unfortunately, only Step-8 has to be repeated at every chapter because of permission issues, so Kiwi Browser is recommended.
 
 
-## Client Usage Instructions | Android | Kiwi/Any-Chromium (\w extension) [TODO]:
-1. Move the 'Frontend-Chrome.crx' file in the Frontend-Chrome folder to your Android device.
-2. Install Kiwi browser on android from google playstore.
-3. Open browser settings menu (3 dots), select 'Extensions', then select '+(from .zip / crx)' and browse for the 'Frontend-Chrome.crx' file.
-4. Toggle on the extension and accept the permissions.
-5. Follow Step-0 of 'Client Usage Instructions - PC - Chrome' **but use either Private IP or ngrokURL**.
-6. Open any black-and-white mange page.
-7. Tap settings menu, scroll down, select the colorizer extension.
-8. Input the server URL in the 'API Base-URL', and go back.
-9. [TODO]
-10. Press 'Colorize!' and enjoy!.
+## Client Usage Instructions | Android | Kiwi/Any-Chromium (\w extension):
+1. First on PC Chrome, go to <a href="chrome://extensions/">extension</a> settings and click 'Pack extension' on top-left.
+2. Click browse, then navigate and choose the Frontend-Chrome folder and click 'Pack extension'.
+3. This will create a 'Frontend-Chrome.crx' file. Move this file to your android device.
+4. Install Kiwi browser on android from google playstore.
+5. Open browser settings menu (3 dots), select 'Extensions', then select '+(from .zip / crx)' and browse for the 'Frontend-Chrome.crx' file.
+6. Toggle on the extension and accept the permissions.
+7. Follow Step-0 of 'Client Usage Instructions - PC - Chrome' **but use either Private IP or ngrokURL**.
+8. Open any black-and-white mange page.
+9. Tap settings menu (3 dots), scroll down, select the 'Manga-Colorizer' extension.
+10. Input the server URL in the 'API Base-URL'.
+11. Add the manga website in the list.
+12. Press 'Colorize!' and enjoy!.
 
 
 ## Credits:
