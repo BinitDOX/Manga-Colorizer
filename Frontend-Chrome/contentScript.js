@@ -5,8 +5,6 @@ if (window.injectedMC !== 1) {
 
     // Dynamic private variables
     var activeFetches = 0;
-    var overwriteCache = false;  // Only on image request mismatch
-    var cacheResetTimer = null;
 
     // Configuration variables
     var maxActiveFetches = 1;  // Number of images to request and process parallely
@@ -250,7 +248,7 @@ if (window.injectedMC !== 1) {
             }
         }
 
-        var oc = overwriteCache && !img.src.includes('animation')  // Can be better
+        const isAnimated = img.src.includes('animation')
         if (activeFetches < maxActiveFetches) {
             activeFetches += 1;
             img.dataset.isProcessed = true;
@@ -259,11 +257,10 @@ if (window.injectedMC !== 1) {
                 imgURL: img.src,
                 imgWidth: img.width,
 				imgHeight: img.height,
-				cache: cache,
-				overwriteCache: oc,
+				cache: cache && !isAnimated,
 				denoise: denoise,
 				colorize: colorize,
-				upscale: upscale,
+				upscale: upscale && !isAnimated,
 				denoiseSigma: Number(denoiseSigma),
 				upscaleFactor: Number(upscaleFactor),
 
@@ -444,12 +441,7 @@ if (window.injectedMC !== 1) {
                     clonedImg.remove();
                     originalImg.removeAttribute('data-is-processed')
                     originalImg.removeAttribute('data-is-colored')
-                    overwriteCache = true
-                    if (cacheResetTimer !== null) {
-                         clearTimeout(cacheResetTimer);
-                    }
 
-                    cacheResetTimer = setTimeout(() => {overwriteCache=false}, 1500);
                     colorizeMangaEventHandler()
                 }
 

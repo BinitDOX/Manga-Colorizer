@@ -76,10 +76,6 @@ def sanitize_string(input_string):
     return sanitized_string
 
 def distance_from_grayscale(image):
-    """
-    Args:
-        image: Must be a Pillow Image object in RGB mode
-    """
     try:
         img_diff = PIL.ImageChops.difference(image, PIL.ImageOps.grayscale(image).convert('RGB'))
         dist = np.array(img_diff.getdata()).mean()
