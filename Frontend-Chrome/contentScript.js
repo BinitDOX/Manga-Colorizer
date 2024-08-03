@@ -5,6 +5,8 @@ if (window.injectedMC !== 1) {
 
     // Dynamic private variables
     var activeFetches = 0;
+    var overwriteCache = false;  // Only on image request mismatch
+    var cacheResetTimer = null;
 
     // Configuration variables
     var maxActiveFetches = 1;  // Number of images to request and process parallely
@@ -253,9 +255,11 @@ if (window.injectedMC !== 1) {
             img.dataset.isProcessed = true;
             const postData = {
                 imgName: imgName,
+                imgURL: img.src,
                 imgWidth: img.width,
 				imgHeight: img.height,
 				cache: cache,
+				overwriteCache: overwriteCache,
 				denoise: denoise,
 				colorize: colorize,
 				upscale: upscale,
@@ -270,8 +274,6 @@ if (window.injectedMC !== 1) {
 
             if (canSendData)
                 postData.imgData = imgContext.canvas.toDataURL("image/png");
-            else
-                postData.imgURL = img.src;
 
             const options = {
                 method: 'POST',
@@ -441,6 +443,12 @@ if (window.injectedMC !== 1) {
                     clonedImg.remove();
                     originalImg.removeAttribute('data-is-processed')
                     originalImg.removeAttribute('data-is-colored')
+                    overwriteCache = true
+                    if (cacheResetTimer !== null) {
+                         clearTimeout(cacheResetTimer);
+                    }
+
+                    cacheResetTimer = setTimeout(() => {overwriteCache=false}, 1500);
                     colorizeMangaEventHandler()
                 }
 

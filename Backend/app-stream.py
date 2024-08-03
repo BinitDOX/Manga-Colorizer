@@ -1,6 +1,7 @@
 import argparse
 import base64
 import io
+import json
 import random
 import time
 import urllib.error
@@ -36,6 +37,8 @@ def colorize_image_data():
     try:
         req_json = request.get_json()
         img_name = req_json.get('imgName', f'Image-{rid}')
+        img_url = req_json.get('imgURL', '')
+        img_data = req_json.get('imgData')
         img_width = req_json.get('imgWidth', -1)
         img_height = req_json.get('imgHeight', -1)
         colorize = req_json.get('colorize', config.colorize)
@@ -44,6 +47,7 @@ def colorize_image_data():
         denoise_sigma = req_json.get('denoiseSigma', config.denoise_sigma)
         upscale_factor = req_json.get('upscaleFactor', config.upscale_factor)
         cache = req_json.get('cache', False)
+        overwrite_cache = req_json.get('overwriteCache', False)
         manga_title = req_json.get('mangaTitle', '')
         manga_chapter = req_json.get('mangaChapter', '')
 
@@ -62,17 +66,19 @@ def colorize_image_data():
         if manga_title and manga_chapter:
             print(f'[+] [{rid}] Detected manga: {manga_title} >> {manga_chapter}')
             if cache and not rid in img_name:
-                cached_image = load_from_cache(manga_title, manga_chapter, img_name)
+                cached_image, img_src = load_from_cache(manga_title, manga_chapter, img_name)
                 if cached_image:
-                    print(f'[+] [{rid}] Retrieving cached image')
-                    return jsonify({'colorImgData': cached_image})
+                    if img_src and img_src == img_url:
+                        print(f'[+] [{rid}] Retrieving cached image')
+                        return jsonify({'colorImgData': cached_image})
+                    else:
+                        print(f'[-] [{rid}] Requested image does not match cached image')
+                        print(f'[+] [{rid}] Cache overwrite: {overwrite_cache}')
+                        cache = overwrite_cache
 
         print(f'[+] [{rid}] Requested image: {img_name}, Width: {img_width}, Height: {img_height}')
-        print(
-            f'[+] [{rid}] Colorize: {colorize}, Upscale: {upscale}{f"(x{upscale_factor})" if upscale else ""}, Denoise: {denoise}')
+        print(f'[+] [{rid}] Colorize: {colorize}, Upscale: {upscale}{f"(x{upscale_factor})" if upscale else ""}, Denoise: {denoise}')
 
-        img_data = req_json.get('imgData')
-        img_url = req_json.get('imgURL')
         if img_data:
             img_metadata, img_data64 = img_data.split(',', 1)
             orig_image_binary = base64.decodebytes(bytes(img_data64, encoding='utf-8'))
@@ -109,7 +115,7 @@ def colorize_image_data():
         if cache:
             try:
                 if manga_title and manga_chapter and rid not in img_name:
-                    save_to_cache(manga_title, manga_chapter, img_name, image)
+                    save_to_cache(manga_title, manga_chapter, img_name, img_url, image)
                     print(f'[+] [{rid}] Imaged cached')
                 else:
                     print(f'[-] [{rid}] Caching enabled, but manga details could not be detected, skipping')
@@ -142,24 +148,49 @@ def handle_cuda_error(e):
         initialize_components()
 
 def get_cache_filename(manga_title, manga_chapter, image_name):
-    title_dir = os.path.join(config.cache_root.strip().replace(' ', '_'), sanitize_string(manga_title.strip()))
-    chapter_dir = os.path.join(title_dir, sanitize_string(manga_chapter.strip()))
+    chapter_dir = get_cache_dir(manga_title, manga_chapter)
     filename = f"{sanitize_string(image_name.strip())}.webp"
     return os.path.join(chapter_dir, filename)
 
+def get_cache_dir(manga_title, manga_chapter):
+    title_dir = os.path.join(config.cache_root.strip().replace(' ', '_'), sanitize_string(manga_title.strip()))
+    chapter_dir = os.path.join(title_dir, sanitize_string(manga_chapter.strip()))
+    return chapter_dir
 
-def save_to_cache(manga_title, manga_chapter, image_name, image):
+def get_cache_src_map_filename(manga_title, manga_chapter, filename="image_src_map.json"):
+    chapter_dir = get_cache_dir(manga_title, manga_chapter)
+    return os.path.join(chapter_dir, filename)
+
+def save_to_cache(manga_title, manga_chapter, image_name, image_src, image):
     cache_filename = get_cache_filename(manga_title, manga_chapter, image_name)
     os.makedirs(os.path.dirname(cache_filename), exist_ok=True)
     save_image(image, cache_filename)
-
+    src_map_filename = get_cache_src_map_filename(manga_title, manga_chapter)
+    update_image_src_map(image_name, image_src, src_map_filename)
 
 def load_from_cache(manga_title, manga_chapter, image_name):
     cache_filename = get_cache_filename(manga_title, manga_chapter, image_name)
+    src_map_filename = get_cache_src_map_filename(manga_title, manga_chapter)
+    image_src_map = get_image_src_map(src_map_filename)
     if os.path.exists(cache_filename):
-        return load_image_as_base64(cache_filename)
-    return None
+        return load_image_as_base64(cache_filename), image_src_map.get(image_name)
+    return None, None
 
+def get_image_src_map(filename):
+    if os.path.exists(filename):
+        try:
+            with open(filename, 'r') as json_file:
+                return json.load(json_file)
+        except json.JSONDecodeError:
+            return {}
+    else:
+        return {}
+
+def update_image_src_map(image_name, image_src, filename):
+    image_src_map = get_image_src_map(filename)
+    image_src_map[image_name] = image_src
+    with open(filename, 'w') as json_file:
+        json.dump(image_src_map, json_file, indent=4)
 
 def check_model_availability(rid, requested, available, name):
     if requested and not available:
