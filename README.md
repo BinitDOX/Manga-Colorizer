@@ -96,18 +96,21 @@ TODO
 
 
 ## Client Usage Instructions | Android | Firefox Nightly:
-1. Install Firefox Nightly browser on android from google playstore.
-2. Open settings, scroll down and select 'About Firefox Nightly'.
-3. Keep Tapping on Firefox logo, until the Debug menu is enabled.
-4. Go back and select Custom Add-on collection
-5. Input <code>17834213</code> in User-ID and <code>XODalG-MC</code> in Collection name.
-6. Follow Step-0 of 'Client Usage Instructions | PC | Firefox' **but use either Private IP or ngrokURL**.
-7. Open any black-and-white mange page.
-8. Tap settings menu (3 dots), select Add-ons, select the colorizer extension.
-9. Input the server URL in the 'API URL' field.
-10. Add the manga website in the list.
-11. Press 'Colorize!' and enjoy!.
-12. Unfortunately, only Step-8 has to be repeated at every chapter because of permission issues, so Kiwi Browser is recommended.
+1. First, goto 'Frontend-Firefox' folder and zip all the files.
+2. Select all the files, then right-click, Send to, Compressed (zip) folder.
+3. Rename this zip file to 'Frontend-Firefox.zip' and move it to your android device.
+4. Install Firefox Nightly browser on android from google playstore.
+5. Open settings, scroll down and select 'About Firefox Nightly'.
+6. Keep Tapping on Firefox logo, until the Debug menu is enabled.
+7. Go back and select Secret settings, and choose to install Add-on from file.
+8. Browse for the 'Frontend-Firefox.zip' file that you uploaded to you device.
+9. Follow Step-0 of 'Client Usage Instructions | PC | Firefox' **but use either Private IP or ngrokURL**.
+10. Open any black-and-white mange page.
+11. Tap settings menu (3 dots), select Add-ons, select the colorizer extension.
+12. Input the server URL in the 'API URL' field.
+13. Add the manga website in the list.
+14. Press 'Colorize!' and enjoy!.
+15. Unfortunately, only Step-8 has to be repeated at every chapter because of permission issues, so Kiwi Browser is recommended.
 
 
 ## Client Usage Instructions | Android | Kiwi/Any-Chromium (\w extension):
