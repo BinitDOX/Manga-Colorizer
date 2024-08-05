@@ -5,8 +5,10 @@ if (window.injectedMC !== 1) {
 
     // Dynamic private variables
     var activeFetches = 0;
+    var isSelecting = false;
 
     // Configuration variables
+    var apiURL = ''
     var maxActiveFetches = 1;  // Number of images to request and process parallely
     var colorTolerance = 30;  // MSE Cutoff check for an already-colored image
     var colorStride = 4;  // Skip every this many rows and columns pixels for MSE calculation
@@ -38,6 +40,10 @@ if (window.injectedMC !== 1) {
         const css = `
             .isHidden {
                 display: none !important;
+            }
+            .highlight {
+                border: 2px solid red !important;
+                cursor: crosshair !important;
             }
         `;
         const style = document.createElement('style');
@@ -228,13 +234,14 @@ if (window.injectedMC !== 1) {
         });
     }
 
-    const setColoredOrFetch = (index, img, imgName, apiURL, colorStride, imgContext, mangaProps) => {
+    const setColoredOrFetch = (index, img, imgName, apiURL, force, imgContext, mangaProps) => {
         var canSendData = true;
         try {
             const grayMse = grayscaleMSE(index, imgContext);
             const grayDist = maxDistFromGray(index, imgContext);
+
             const ct = colorTolerance;
-            if (grayMse >= ct*10 || (grayMse >= ct && grayDist!=0)) {
+            if (!force && (grayMse >= ct*10 || (grayMse >= ct && grayDist!=0))) {
                 img.dataset.isColored = true;
                 img.dataset.isProcessed = true;
                 console.log(`[MC] [${index}] Already colored: ${imgName}`);
@@ -249,7 +256,7 @@ if (window.injectedMC !== 1) {
         }
 
         const isAnimated = img.src.includes('animation')
-        if (activeFetches < maxActiveFetches) {
+        if (force || activeFetches < maxActiveFetches) {
             activeFetches += 1;
             img.dataset.isProcessed = true;
             const postData = {
@@ -284,7 +291,7 @@ if (window.injectedMC !== 1) {
             fetchColorizedImg(index, new URL('colorize-image-data', apiURL).toString(), options, img, imgName)
                 .finally(() => {
                     activeFetches -= 1;
-                    colorizeMangaEventHandler();
+                    if(!force) colorizeMangaEventHandler();
                 });
             return 3
         } else {
@@ -292,13 +299,13 @@ if (window.injectedMC !== 1) {
         }
     }
 
-    const colorizeImg = (index, img, apiURL, colorStride, mangaProps) => {
+    const colorizeImg = (index, img, apiURL, force, mangaProps) => {
         if (apiURL) try {
             const imageName = mangaProps.altText ? img.alt : ''
             const imgName = imageName || (img.src || img.dataset?.src || '').rsplit('/', 1)[1];
             if (imgName) {
                 let imgContext = canvasContextFromImg(img);
-                return setColoredOrFetch(index, img, imgName, apiURL, colorStride, imgContext, mangaProps);
+                return setColoredOrFetch(index, img, imgName, apiURL, force, imgContext, mangaProps);
             }
             return 0;
         } catch(e) {
@@ -307,13 +314,105 @@ if (window.injectedMC !== 1) {
         }
     }
 
+    // ---- Select mode functions ----
+    function enterSelectMode() {
+        isSelecting = true;
+
+        document.addEventListener('mouseover', highlightImage);
+        document.addEventListener('mouseout', removeHighlight);
+        document.addEventListener('click', selectImage);
+    }
+
+    function isValidImageElement(element) {
+        return element.tagName.toLowerCase() === 'img' && !element.dataset.isCloned
+    }
+
+    function highlightImage(event) {
+        if (!isSelecting) return;
+
+        const element = event.target;
+        if (isValidImageElement(element)) {
+            element.classList.add('highlight');
+        }
+    }
+
+    function removeHighlight(event) {
+        if (!isSelecting) return;
+
+        const element = event.target;
+        if (isValidImageElement(element)) {
+            element.classList.remove('highlight');
+        }
+    }
+
+    function selectImage(event) {
+        if (!isSelecting) return;
+
+        event.preventDefault();
+        event.stopPropagation();
+        const element = event.target;
+
+        if (isValidImageElement(element)) {
+            colorizeSingleImage(element);
+            exitSelectMode();
+        } else {
+            exitSelectMode();
+        }
+    }
+
+    function exitSelectMode() {
+        isSelecting = false;
+        removeAllHighlights();
+        document.removeEventListener('mouseover', highlightImage);
+        document.removeEventListener('mouseout', removeHighlight);
+        document.removeEventListener('click', selectImage);
+
+        browser.runtime.sendMessage({ action: "exitSelectMode" });
+        console.log('[MC] Exited select mode')
+    }
+
+    function removeAllHighlights() {
+        const highlightedElements = document.getElementsByClassName('highlight');
+        while (highlightedElements.length > 0) {
+            highlightedElements[0].classList.remove('highlight');
+        }
+    }
+
+    function colorizeSingleImage(img) {
+        console.log('[MC] Force colorize: ', img.src)
+
+        const imgSrc = img.src;
+        const imgs = document.querySelectorAll(`img[src="${imgSrc}"]`);
+        imgs.forEach((imgElement) => {
+            if(imgElement.dataset.isCloned){
+                imgElement.remove();
+            }
+            if(imgElement.dataset.isProcessed){
+                imgElement.removeAttribute('data-is-colored');
+            }
+            if(imgElement.dataset.isProcessed){
+                console.log('[MC] A colorized image is being re-colorized')
+                imgElement.removeAttribute('data-is-processed');
+            }
+        });
+
+        const site = Object.keys(siteConfigurations).find(site => window.location.hostname.includes(site));
+        const config = siteConfigurations[site];
+        const title = site ? parseQuery(config.titleQuery) : '';
+        const chapter = site ? parseQuery(config.chapterQuery) : '';
+        const pageNameFromAltText = site ? config.useAltTextAsImageName : false
+
+        const mangaProps = {title: title, chapter: chapter, altText: pageNameFromAltText}
+        let status = colorizeImg(0, img, apiURL, true, mangaProps);
+        console.log('[MC] Force colorization status: ', status)
+    }
 
     // ---- Extension interface functions ----
     const colorizeMangaEventHandler = (event=null) => {
         try {
             browser.storage.local.get(["apiURL", "maxActiveFetches", "showOriginal", "showColorized", "cache", "denoise", "colorize", "upscale", "denoiseSigma", "upscaleFactor",
                 "colorTolerance", "colorStride", "minImgHeight", "minImgHeight"], (result) => {
-                const apiURL = result.apiURL;
+                apiURL = result.apiURL;
                 if (apiURL && siteConfigurations) {
                     maxActiveFetches = Number(result.maxActiveFetches || "1")
                     showOriginal = result.showOriginal
@@ -372,7 +471,7 @@ if (window.injectedMC !== 1) {
                             awaited++
                         } else {
                             const mangaProps = {title: title, chapter: chapter, altText: pageNameFromAltText}
-                            let status = colorizeImg(index, img, apiURL, colorStride, mangaProps);
+                            let status = colorizeImg(index, img, apiURL, false, mangaProps);
                             switch(status){
                                 case 0: failed++; break;
                                 case 1: colored++; break;
@@ -416,6 +515,10 @@ if (window.injectedMC !== 1) {
         if (request.action === 'runColorizer'){
             console.log('[MC] Running colorizer')
             colorizeMangaEventHandler();
+        }
+        if(request.action === 'startSelectMode') {
+            console.log('[MC] Entered select mode')
+            enterSelectMode();
         }
         sendResponse({status: 'done'});
     });

@@ -137,3 +137,10 @@ button:focus {
   outline: none;
   box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.2);
 }
+
+button:disabled {
+  background-color: grey;
+  color: lightgrey;
+  cursor: not-allowed;
+  border: 1px solid lightgrey;
+}

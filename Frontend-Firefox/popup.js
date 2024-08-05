@@ -16,6 +16,7 @@ const websitesInput = document.getElementById("websites-input-field");
 const addSiteButton = document.getElementById("addsite");
 const runButton = document.getElementById("run");
 const testApiButton = document.getElementById("test-api");
+const forceRunButton = document.getElementById("force-run");
 
 browser.storage.local.get(["apiURL", "maxActiveFetches", "showOriginal", "showColorized", "cache", "denoise",
                 "colorize", "upscale", "denoiseSigma", "upscaleFactor",
@@ -118,6 +119,21 @@ runButton.addEventListener("click",() => {
         });
     });
 })
+
+forceRunButton.addEventListener('click', () => {
+    forceRunButton.textContent = "Select an Image";
+    forceRunButton.disabled = true
+    browser.tabs.query({ active: true, currentWindow: true }, function (tabs) {
+        chrome.tabs.sendMessage(tabs[0].id, { action: "startSelectMode" });
+    });
+});
+
+browser.runtime.onMessage.addListener((request, sender, sendResponse) => {
+    if (request.action === "exitSelectMode") {
+        forceRunButton.textContent = "Force Colorize!";
+        forceRunButton.disabled = false
+    }
+});
 
 showOriginalCheckbox.addEventListener('change', updateVisibility);
 showColorizedCheckbox.addEventListener('change', updateVisibility);
