@@ -17,6 +17,7 @@ TODO
 - [x] Additional settings for more customization options.
 - [x] Organized caching into a dedicated folder for reuse.
 - [x] Options to display original, colorized version, or both.
+- [x] Force colorization. 
 
 ## Notes:
 - Old legacy project can be found <a href="https://github.com/BinitDOX/Manga-Colorizer/tree/main">here</a>.
