@@ -3,7 +3,8 @@ Introducing Manga-Colorizer, a tool that brings your mangas to life!
 
 
 ## Demo Video - PC:
-TODO
+[![DEMO VIDEO](https://github.com/user-attachments/assets/6737808a-8ad1-4dd3-b642-34c8020ebd98)](https://youtu.be/aD0jUb-vPOo)
+
 
 ## Demo Video - Android:
 TODO
