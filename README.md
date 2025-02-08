@@ -7,7 +7,7 @@ Introducing Manga-Colorizer, a tool that brings your mangas to life!
 
 
 ## Demo Video - Android:
-TODO
+[DEMO VIDEO](https://drive.google.com/file/d/15Rw4aykO_7Gedj6sR50gAiIiaTjHLr6o/view?usp=sharing)
 
 ## New Features:
 - [x] Now works seamlessly on any website.
@@ -17,6 +17,7 @@ TODO
 - [x] Additional settings for more customization options.
 - [x] Organized caching into a dedicated folder for reuse.
 - [x] Options to display original, colorized version, or both.
+- [x] Force colorization. 
 
 ## Notes:
 - Old legacy project can be found <a href="https://github.com/BinitDOX/Manga-Colorizer/tree/main">here</a>.
