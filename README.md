@@ -119,7 +119,7 @@ Introducing Manga-Colorizer, a tool that brings your mangas to life!
 1. First on PC Chrome, go to <a href="chrome://extensions/">extension</a> settings and click 'Pack extension' on top-left.
 2. Click browse, then navigate and choose the Frontend-Chrome folder and click 'Pack extension'.
 3. This will create a 'Frontend-Chrome.crx' file. Move this file to your android device.
-4. Install Kiwi browser on android from google playstore.
+4. Install [Kiwi browser](https://drive.google.com/file/d/1Zsvfy2zchtqXx4lEgX544JKWfX2kD_wp/view?usp=sharing) on android from google playstore.
 5. Open browser settings menu (3 dots), select 'Extensions', then select '+(from .zip / crx)' and browse for the 'Frontend-Chrome.crx' file.
 6. Toggle on the extension and accept the permissions.
 7. Follow Step-0 of 'Client Usage Instructions - PC - Chrome' **but use either Private IP or ngrokURL**.
