@@ -1,0 +1,25 @@
+[project]
+name = "manga-colorizer-ai-server"
+version = "0.1.0"
+description = "AI processing server for MangaColorizerPro"
+readme = "README.md"
+requires-python = ">=3.10, <3.12"
+dependencies = [
+    "einops",
+    "pydantic",
+    "pydantic-settings",
+    "fastapi",
+    "uvicorn[standard]",
+    "Pillow",
+    "numpy<2.0",
+    "opencv-python-headless",
+    "torch",
+    "torchvision",
+    "gdown",
+    "python-multipart",
+    "watchgod"
+]
+
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"

@@ -1,0 +1,8 @@
+__pycache__
+app_ai.egg-info
+*.pyc
+.mypy_cache
+.coverage
+htmlcov
+.cache
+.venv
