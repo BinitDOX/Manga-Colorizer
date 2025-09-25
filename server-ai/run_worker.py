@@ -89,7 +89,7 @@ def main():
         sys.exit(1)
 
     try:
-        notify_fleet_manager(worker_id, 'BOOTING')
+        notify_fleet_manager(worker_id, 'booting')
 
         def run_fastapi():
             logger.info("Starting FastAPI server using uvicorn...")
@@ -108,7 +108,7 @@ def main():
         public_url = ngrok.connect(8000).public_url
         logger.info(f"Ngrok tunnel established at: {public_url}")
 
-        notify_fleet_manager(worker_id, 'ACTIVE', url=public_url)
+        notify_fleet_manager(worker_id, 'active', url=public_url)
 
         logger.info("Worker is fully operational. Entering keep-alive loop.")
         while not shutdown_event.is_set():
@@ -118,11 +118,11 @@ def main():
 
     except Exception as e:
         logger.error(f"A critical error occurred in the main loop: {e}", exc_info=True)
-        notify_fleet_manager(worker_id, 'FAILED', error=str(e))
+        notify_fleet_manager(worker_id, 'failed', error=str(e))
     finally:
         logger.info("Shutting down worker.")
         ngrok.kill()
-        notify_fleet_manager(worker_id, 'STOPPING')
+        notify_fleet_manager(worker_id, 'stopping')
         logger.info("Script finished.")
 
 
