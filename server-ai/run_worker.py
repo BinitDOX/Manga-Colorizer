@@ -30,7 +30,7 @@ def verify_janitor_secret(credentials: HTTPAuthorizationCredentials = Depends(be
     """A FastAPI dependency to protect the /stop endpoint."""
     try:
         secrets = UserSecretsClient()
-        janitor_secret = secrets.get_secret("JANITOR_SECRET")
+        janitor_secret = secrets.get_secret("WORKER_JANITOR_SECRET")
         if credentials.scheme != "Bearer" or credentials.credentials != janitor_secret:
             logger.warning("Unauthorized attempt to access /stop endpoint.")
             raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid janitor token")
@@ -46,7 +46,7 @@ def notify_fleet_manager(worker_id, status: str, url: str = None, error: str = N
     try:
         secrets = UserSecretsClient()
         manager_url = secrets.get_secret("FLEET_MANAGER_URL")
-        secret = secrets.get_secret("REGISTRATION_SECRET")
+        secret = secrets.get_secret("WORKER_REGISTRATION_SECRET")
 
         payload = {
             "worker_id": worker_id,
