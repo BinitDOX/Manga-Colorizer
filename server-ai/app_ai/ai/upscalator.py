@@ -46,7 +46,7 @@ class MangaUpscaler:
 
         try:
             with open(config.upscaler_path, 'rb') as f:
-                model_or_chkpt = torch.load(f, map_location=self.device)
+                model_or_chkpt = torch.load(f, map_location=self.device, weights_only=False)
         finally:
             pickle.Unpickler = original_unpickler
 

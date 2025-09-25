@@ -17,7 +17,8 @@ dependencies = [
     "torchvision",
     "gdown",
     "python-multipart",
-    "watchgod"
+    "watchgod",
+    "pyngrok>=7.4.0",
 ]
 
 [build-system]

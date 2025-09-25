@@ -1,5 +1,6 @@
 import logging
 import os
+import sys
 import warnings
 from typing import Literal, Any
 
@@ -8,9 +9,14 @@ from pydantic import HttpUrl, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 # --- Basic Logging Setup ---
+for handler in logging.root.handlers[:]:
+    logging.root.removeHandler(handler)
+
+# --- Basic Logging Setup ---
 logging.basicConfig(
     level=os.getenv("LOG_LEVEL", "INFO").upper(),
-    format="%(asctime)s | %(name)s | %(levelname)-8s | [%(funcName)-20s:%(lineno)-3d] | %(message)s"
+    format="%(asctime)s | %(name)s | %(levelname)-8s | [%(funcName)-20s:%(lineno)-3d] | %(message)s",
+    handlers=[logging.StreamHandler(sys.stdout)]
 )
 logger = logging.getLogger(__name__)
 
