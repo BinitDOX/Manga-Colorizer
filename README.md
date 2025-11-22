@@ -1,6 +1,30 @@
 # Manga-Colorizer
 Introducing Manga-Colorizer, a tool that brings your mangas to life!
 
+---
+
+## ✨ Now Available: MangaColorizerPro - The Official Extension!
+
+For users who want a seamless, one-click experience with zero setup, we are thrilled to introduce **MangaColorizerPro**!
+
+It's the official, fully managed version of this project, available as a browser extension for both Chrome and Firefox. It's the easiest and most powerful way to enjoy AI-powered manga colorization.
+
+| Feature                 | MangaColorizerPro (Official) | This Project (Self-Hosted) |
+| ----------------------- | :--------------------------: | :------------------------: |
+| **Setup Required**      |             None             |      Yes (Server + Client)        |
+| **AI Backend**          |      Managed & Optimized     |       Own GPU / Kaggle's GPU      |
+| **Automatic Updates**   |              ✅              |           Manual                  |
+| **Premium Features**    |              ✅              |               ✅                  |
+| **Direct Support**      |              ✅              |      Community / Issues           |
+
+- [Install for Chrome](https://chromewebstore.google.com/detail/mangacolorizerpro/ofeggeimdlfipekkabopihemnefgkapk)
+- [Install for Firefox](https://addons.mozilla.org/en-US/firefox/addon/mangacolorizerpro/)
+
+Visit our website to learn more: [**MangaColorizerPro**](https://manga-colorizer-pro.vercel.app/)
+
+For developers and users who prefer to self-host, the original instructions continue below.
+
+---
 
 ## Demo Video - PC:
 [![DEMO VIDEO](https://github.com/user-attachments/assets/6737808a-8ad1-4dd3-b642-34c8020ebd98)](https://youtu.be/aD0jUb-vPOo)
