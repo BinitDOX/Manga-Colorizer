@@ -6,7 +6,6 @@ import time
 import logging
 import threading
 import requests
-from dotenv import load_dotenv
 
 sys.path.append(os.getcwd())
 
@@ -18,7 +17,6 @@ from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 # --- Basic Setup ---
 logger = logging.getLogger("KaggleWorker")
 logger.setLevel("INFO")
-load_dotenv()
 
 # --- Global Shutdown Signal ---
 shutdown_event = threading.Event()
