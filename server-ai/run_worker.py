@@ -6,18 +6,19 @@ import time
 import logging
 import threading
 import requests
+from dotenv import load_dotenv
 
 sys.path.append(os.getcwd())
 
 from app_ai.main import app
 from pyngrok import ngrok, conf
-from kaggle_secrets import UserSecretsClient
 from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 
 # --- Basic Setup ---
 logger = logging.getLogger("KaggleWorker")
 logger.setLevel("INFO")
+load_dotenv()
 
 # --- Global Shutdown Signal ---
 shutdown_event = threading.Event()
@@ -29,8 +30,7 @@ bearer_scheme = HTTPBearer()
 def verify_janitor_secret(credentials: HTTPAuthorizationCredentials = Depends(bearer_scheme)):
     """A FastAPI dependency to protect the /stop endpoint."""
     try:
-        secrets = UserSecretsClient()
-        janitor_secret = secrets.get_secret("WORKER_JANITOR_SECRET")
+        janitor_secret = os.environ["JANITOR_SECRET"]
         if credentials.scheme != "Bearer" or credentials.credentials != janitor_secret:
             logger.warning("Unauthorized attempt to access /stop endpoint.")
             raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid janitor token")
@@ -44,19 +44,11 @@ def verify_janitor_secret(credentials: HTTPAuthorizationCredentials = Depends(be
 def notify_fleet_manager(worker_id, status: str, url: str = None, error: str = None):
     """Securely notifies the Fleet Manager of the worker's status."""
     try:
-        secrets = UserSecretsClient()
-        manager_url = secrets.get_secret("FLEET_MANAGER_URL")
-        secret = secrets.get_secret("WORKER_REGISTRATION_SECRET")
+        manager_url = os.environ["FLEET_MANAGER_URL"]
+        secret = os.environ["REGISTRATION_SECRET"]
 
-        payload = {
-            "worker_id": worker_id,
-            "status": status,
-            "public_url": url,
-            "error_message": error
-        }
-        headers = {
-            "Authorization": f"Bearer {secret}"
-        }
+        payload = {"worker_id": worker_id, "status": status, "public_url": url, "error_message": error}
+        headers = {"Authorization": f"Bearer {secret}", "User-Agent": f"Hydra-Kaggle-Worker/{worker_id}"}
 
         logger.info(f"Notifying Fleet Manager: status={status}, worker_id={worker_id}")
         response = requests.post(manager_url, json=payload, headers=headers, timeout=15)
@@ -65,7 +57,9 @@ def notify_fleet_manager(worker_id, status: str, url: str = None, error: str = N
             logger.error(f"Failed to notify Fleet Manager. Status: {response.status_code}, Body: {response.text}")
         else:
             logger.info("Successfully notified Fleet Manager.")
-
+    except KeyError as e:
+        logger.critical(f"FATAL: Missing required environment variable: {e}. Cannot call home.")
+        raise
     except Exception as e:
         logger.error(f"An exception occurred while notifying Fleet Manager: {e}", exc_info=True)
 
@@ -80,12 +74,11 @@ async def stop_worker():
 # --- Main Worker Logic ---
 def main():
     try:
-        secrets = UserSecretsClient()
-        worker_id = int(secrets.get_secret("WORKER_ID"))
-        ngrok_auth_token = secrets.get_secret("NGROK_AUTH_TOKEN")
-        logger.info(f"Secrets loaded for worker_id: {worker_id}")
+        worker_id = int(os.environ["WORKER_ID"])
+        ngrok_auth_token = os.environ["NGROK_AUTH_TOKEN"]
+        logger.info(f"Secrets loaded from environment for worker_id: {worker_id}")
     except Exception as e:
-        logger.fatal(f"FATAL: Could not retrieve secrets from Kaggle: {e}", exc_info=True)
+        logger.critical(f"FATAL: Could not retrieve required configuration from environment: {e}. Terminating.")
         sys.exit(1)
 
     try:
