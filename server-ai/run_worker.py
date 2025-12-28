@@ -89,12 +89,11 @@ def start_ngrok(port: int, auth_token: str):
     return public_url, cleanup
 
 
-def start_zrok(port: int):
-    token = os.environ["ZROK_AUTH_TOKEN"]
+def start_zrok(port: int, auth_token: str):
 
     try:
         proc_enable = subprocess.Popen(
-            ["zrok", "enable", token],
+            ["zrok", "enable", auth_token],
             stdout=subprocess.PIPE,
             stderr=subprocess.STDOUT,
             text=True
