@@ -89,17 +89,23 @@ def start_ngrok(port: int, auth_token: str):
     return public_url, cleanup
 
 
-def start_zrok(port: int, auth_token: str):
+def start_zrok(port: int):
+    token = os.environ["ZROK_AUTH_TOKEN"]
+
     try:
-        subprocess.run(
-            ["zrok", "enable", auth_token],
-            stdout=subprocess.STDOUT,
+        proc_enable = subprocess.Popen(
+            ["zrok", "enable", token],
+            stdout=subprocess.PIPE,
             stderr=subprocess.STDOUT,
-            check=True
+            text=True
         )
+
+        for line in proc_enable.stdout:
+            print(line, end="")
+        proc_enable.wait()
         logger.info("zrok enabled")
-    except subprocess.CalledProcessError:
-        logger.info("zrok already enabled or token invalid")
+    except Exception as e:
+        logger.warning(f"zrok enable failed or already enabled: {e}")
 
     proc = subprocess.Popen(
         ["zrok", "share", "public", str(port)],
@@ -109,15 +115,9 @@ def start_zrok(port: int, auth_token: str):
     )
 
     public_url = None
-    start_time = time.time()
-    timeout = 30
     url_re = re.compile(r"https://[^\s│]+")
-
-    while time.time() - start_time < timeout:
-        line = proc.stdout.readline()
-        if not line:
-            time.sleep(1)
-            continue
+    for line in proc.stdout:
+        print(line, end="")
         match = url_re.search(line)
         if match:
             public_url = match.group(0).strip()
@@ -135,6 +135,7 @@ def start_zrok(port: int, auth_token: str):
             logger.info("Zrok tunnel stopped")
 
     return public_url, cleanup
+
 
 
 # --- Main Worker Logic ---
