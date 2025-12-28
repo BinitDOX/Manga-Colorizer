@@ -93,8 +93,8 @@ def start_zrok(port: int, auth_token: str):
     try:
         subprocess.run(
             ["zrok", "enable", auth_token],
-            stdout=subprocess.DEVNULL,
-            stderr=subprocess.DEVNULL,
+            stdout=subprocess.STDOUT,
+            stderr=subprocess.STDOUT,
             check=True
         )
         logger.info("zrok enabled")
@@ -109,12 +109,18 @@ def start_zrok(port: int, auth_token: str):
     )
 
     public_url = None
-    url_re = re.compile(r"https://[^\s]+")
-    for line in proc.stdout:
+    start_time = time.time()
+    timeout = 30
+    url_re = re.compile(r"https://[^\s│]+")
+
+    while time.time() - start_time < timeout:
+        line = proc.stdout.readline()
+        if not line:
+            time.sleep(1)
+            continue
         match = url_re.search(line)
         if match:
-            public_url = match.group(0).split("││")[0]
-            public_url = public_url.strip()
+            public_url = match.group(0).strip()
             break
 
     if not public_url:
