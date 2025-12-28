@@ -6,6 +6,9 @@ import time
 import logging
 import threading
 import requests
+import argparse
+import subprocess
+import re
 
 sys.path.append(os.getcwd())
 
@@ -69,11 +72,81 @@ async def stop_worker():
     return {"message": "Shutdown signal received. Worker is terminating."}
 
 
+# ---------------- Tunnel helpers ----------------
+
+def start_ngrok(port: int, auth_token: str):
+    conf.get_default().auth_token = auth_token
+    public_url = ngrok.connect(port).public_url
+    logger.info(f"Ngrok tunnel established at: {public_url}")
+
+    def cleanup():
+        try:
+            ngrok.kill()
+            logger.info("Ngrok tunnel stopped")
+        except Exception as e:
+            logger.warning(f"Ngrok cleanup skipped: {e}")
+
+    return public_url, cleanup
+
+
+def start_zrok(port: int, auth_token: str):
+    try:
+        subprocess.run(
+            ["zrok", "enable", auth_token],
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+            check=True
+        )
+        logger.info("zrok enabled")
+    except subprocess.CalledProcessError:
+        logger.info("zrok already enabled or token invalid")
+
+    proc = subprocess.Popen(
+        ["zrok", "share", "public", str(port)],
+        stdout=subprocess.PIPE,
+        stderr=subprocess.STDOUT,
+        text=True,
+    )
+
+    public_url = None
+    url_re = re.compile(r"https://[^\s]+")
+    for line in proc.stdout:
+        match = url_re.search(line)
+        if match:
+            public_url = match.group(0).split("││")[0]
+            public_url = public_url.strip()
+            break
+
+    if not public_url:
+        proc.terminate()
+        raise RuntimeError("Failed to obtain zrok public URL")
+
+    logger.info(f"Zrok tunnel established at: {public_url}")
+
+    def cleanup():
+        if proc.poll() is None:
+            proc.terminate()
+            logger.info("Zrok tunnel stopped")
+
+    return public_url, cleanup
+
+
 # --- Main Worker Logic ---
 def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "--tunnel",
+        choices=["ngrok", "zrok"],
+        default=os.environ.get("TUNNEL", "ngrok"),
+        help="Tunnel provider (default: ngrok)"
+    )
+    args = parser.parse_args()
+
+    tunnel_cleanup = None
+
     try:
         worker_id = int(os.environ["WORKER_ID"])
-        ngrok_auth_token = os.environ["NGROK_AUTH_TOKEN"]
+        auth_token = os.environ["AUTH_TOKEN"]
         logger.info(f"Secrets loaded from environment for worker_id: {worker_id}")
     except Exception as e:
         logger.critical(f"FATAL: Could not retrieve required configuration from environment: {e}. Terminating.")
@@ -94,10 +167,11 @@ def main():
         time.sleep(30)
         logger.info("FastAPI server thread started and models should be loaded.")
 
-        # Start ngrok tunnel
-        conf.get_default().auth_token = ngrok_auth_token
-        public_url = ngrok.connect(8000).public_url
-        logger.info(f"Ngrok tunnel established at: {public_url}")
+        # --- Tunnel selection ---
+        if args.tunnel == "ngrok":
+            public_url, tunnel_cleanup = start_ngrok(8000, auth_token)
+        else:
+            public_url, tunnel_cleanup = start_zrok(8000, auth_token)
 
         notify_fleet_manager(worker_id, 'active', url=public_url)
 
@@ -112,7 +186,8 @@ def main():
         notify_fleet_manager(worker_id, 'failed', error=str(e))
     finally:
         logger.info("Shutting down worker.")
-        ngrok.kill()
+        if tunnel_cleanup:
+            tunnel_cleanup()
         notify_fleet_manager(worker_id, 'stopping')
         logger.info("Script finished.")
 
