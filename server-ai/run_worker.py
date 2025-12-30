@@ -132,6 +132,11 @@ def start_zrok(port: int, auth_token: str):
         if proc.poll() is None:
             proc.terminate()
             logger.info("Zrok tunnel stopped")
+        try:
+            subprocess.run(["zrok", "disable"], check=False)
+            logger.info("Zrok environment disabled")
+        except Exception as e:
+            logger.error(f"Failed to disable Zrok environment: {e}")
 
     return public_url, cleanup
 
