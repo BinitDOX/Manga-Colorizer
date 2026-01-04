@@ -24,6 +24,27 @@ from utils.utils import distance_from_grayscale, generate_random_id, \
 app = Flask(__name__)
 CORS(app, resources={r"/*": {"origins": "*"}})
 
+DEFAULT_MODEL_PATHS = {
+    # Colorizers
+    'AlacGAN': 'networks/generator.zip',
+    'CycleGAN': 'networks/latest_net_G_A.pth',
+
+    # Upscalers
+    'ESRGAN': 'networks/RealESRGAN_x4plus_anime_6B.pt',
+    'GigaGAN': 'networks/GigaGAN.ckpt'
+}
+
+def resolve_paths(config):
+    if config.colorizer_path is None:
+        config.colorizer_path = DEFAULT_MODEL_PATHS.get(config.colorizer_type)
+        print(f"[*] Defaulting colorizer path to: {config.colorizer_path}")
+
+    if config.upscaler_path is None:
+        config.upscaler_path = DEFAULT_MODEL_PATHS.get(config.upscaler_type)
+        print(f"[*] Defaulting upscaler path to: {config.upscaler_path}")
+
+class ModelSettings:
+    pass
 
 @app.route('/')
 def index():
@@ -100,7 +121,7 @@ def colorize_image_data():
 
         if colorize:
             print(f'[*] [{rid}] Colorizing image...')
-            image = colorize_image(rid, image, colorizer, config.colorized_image_size)
+            image = colorize_image(rid, image, colorizer)
 
         if upscale:
             print(f'[*] [{rid}] Upscaling image...')
@@ -204,7 +225,7 @@ def denoise_image(rid, image, denoiser, sigma):
     return denoised_image
 
 
-def colorize_image(rid, image, colorizer, size):
+def colorize_image(rid, image, colorizer, size=0):
     start_time = time.time()
     colorizer.set_image((image.astype('float32') / 255), size)
     colorized_image = colorizer.colorize()
@@ -234,30 +255,54 @@ def initialize_components():
     denoiser = MangaDenoiser(config) if config.denoise else None
     print(f'[+] Components initialized')
 
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Run Manga Colorizer server')
     parser.add_argument('--device', choices=['cpu', 'cuda'], default='cuda', help='Device to use')
 
-    parser.add_argument('--colorizer_path', default='networks/generator.zip')
-    parser.add_argument('--extractor_path', default='networks/extractor.pth')
-    parser.add_argument('--upscaler_path', default='networks/RealESRGAN_x4plus_anime_6B.pt')
-    parser.add_argument('--upscaler_type', choices=['ESRGAN', 'GigaGAN'], default='ESRGAN')
+    parser.add_argument('--colorizer_path', default=None, help='Path to colorizer weights')
+    parser.add_argument('--colorizer_type', choices=['AlacGAN', 'CycleGAN'], default='AlacGAN',
+                        help='Which architecture: AlacGAN or CycleGAN')
+
+    parser.add_argument('--upscaler_path', default=None, help='Path to upscaler weights')
+    parser.add_argument('--upscaler_type', choices=['ESRGAN', 'GigaGAN'], default='ESRGAN',
+                        help='Which architecture: ESRGAN or GigaGAN')
 
     parser.add_argument('--no-ssl', dest='ssl', action='store_false', default=True, help='Disable SSL context.')
     parser.add_argument('--no-upscale', dest='upscale', action='store_false', default=True, help='Disable upscaling')
     parser.add_argument('--no-colorize', dest='colorize', action='store_false', default=True,
                         help='Disable colorization')
     parser.add_argument('--no-denoise', dest='denoise', action='store_false', default=True, help='Disable denoiser')
+
     parser.add_argument('--upscale_factor', choices=[2, 4], default=4, type=int, help='Upscale by x2 or x4')
     parser.add_argument('--denoise_sigma', default=25, type=int, help='How much noise to expect from the image')
 
     config = parser.parse_args()
 
-    config.upscaler_tile_size = 256
-    config.colorizer_tile_size = 0
-    config.tile_pad = 8
-    config.colorized_image_size = 576  # Width
-    config.cache_root = 'manga'
+    # Model Configuration
+    # 1. ESRGAN Settings
+    config.esrgan = ModelSettings()
+    config.esrgan.tile_size = 256
+    config.esrgan.tile_pad = 10
+
+    # 2. GigaGAN (AuraSR) Settings
+    config.gigagan = ModelSettings()
+    config.gigagan.batch_size = 4  # Modify to 8, 16, or even 32 if enough VRAM
+    config.gigagan.use_overlap = False  # True = High Quality (Slow x2), False = Fast
+
+    # 3. AlacGAN Settings
+    config.alacgan = ModelSettings()
+    config.alacgan.tile_size = 0
+    config.alacgan.tile_pad = 0
+    config.alacgan.image_size = 576
+
+    # 4. CycleGAN Settings
+    config.cyclegan = ModelSettings()
+    config.cyclegan.tile_size = 0
+    config.cyclegan.tile_pad = 0
+    config.cyclegan.image_size = 512
+
+    resolve_paths(config)
 
     initialize_components()
 
