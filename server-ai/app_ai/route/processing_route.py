@@ -1,6 +1,7 @@
 from fastapi import APIRouter, File, UploadFile, Form, HTTPException, status, Depends
 from fastapi.responses import Response
 import logging
+from urllib.parse import quote
 
 from app_ai.configuration.config import settings
 from app_ai.service.processing_service import process_image, ProcessingOptions
@@ -46,11 +47,8 @@ async def process_image_endpoint(
     This endpoint processes an uploaded manga image based on the provided form parameters.
     Error handling is managed by the @handle_api_errors decorator.
     """
-    logger.info(f"[{rid}] Incoming request for image processing: {image_name or image_file.filename}")
-    logger.debug(
-        f"[{rid}] Request params: colorize={apply_colorize}, upscale={apply_upscale}, "
-        f"title={manga_title}, chapter={manga_chapter}"
-    )
+    logger.info(f"[{rid}] Incoming request for image processing")
+    logger.debug(f"[{rid}] Request params: colorize={apply_colorize}, upscale={apply_upscale}")
 
     image_bytes = await image_file.read()
     if not image_bytes:
@@ -69,10 +67,13 @@ async def process_image_endpoint(
 
     processed_image_bytes, width, height = await process_image(image_bytes, processing_options, rid)
 
+    raw_filename = image_name or image_file.filename or "image.png"
+    safe_filename = quote(raw_filename)
+
     headers = {
         "X-Processed-Width": str(width),
         "X-Processed-Height": str(height),
-        "Content-Disposition": f'inline; filename="processed_{image_name or image_file.filename}"'
+        "Content-Disposition": f'inline; filename="processed_{safe_filename}"'
     }
 
     logger.info(f"[{rid}] Image processing completed, returning response with headers.")
