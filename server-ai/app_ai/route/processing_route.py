@@ -73,6 +73,7 @@ async def process_image_endpoint(
     headers = {
         "X-Processed-Width": str(width),
         "X-Processed-Height": str(height),
+        "X-Upscale-Applied": "True" if processing_options.apply_upscale else "False",
         "Content-Disposition": f'inline; filename="processed_{safe_filename}"'
     }
 
