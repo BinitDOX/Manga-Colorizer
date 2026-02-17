@@ -12,25 +12,30 @@ sys.path.append(os.getcwd())
 # Import Service Logic
 from app_ai.service.processing_service import process_image, ProcessingOptions
 
-# --- Setup ---
-logging.basicConfig(level="INFO", format="%(asctime)s | PULL-WORKER | %(levelname)s | %(message)s")
-logger = logging.getLogger(__name__)
+# --- Setup Verbose Logging ---
+logging.basicConfig(
+    level="INFO",
+    format="%(asctime)s | %(levelname)s | [%(threadName)s] | %(message)s",
+    force=True
+)
+logger = logging.getLogger("PullWorker")
 
 # --- Configuration ---
 try:
+    # Note: In your latest setup, API_URL seems to be the specific endpoint or base
     API_URL = os.environ["FLEET_MANAGER_URL"]
     SECRET = os.environ["REGISTRATION_SECRET"]
     WORKER_ID = int(os.environ["WORKER_ID"])
     MAX_THREADS = int(os.environ.get("MAX_THREADS", 3))
 except KeyError as e:
-    logger.critical(f"FATAL: Missing env var: {e}")
+    print(f"FATAL: Missing env var: {e}")
     sys.exit(1)
 
 shutdown_event = threading.Event()
 
-
 # --- Helper: Fleet Notification ---
 def notify_fleet_manager(status: str, error: str = None):
+    """Updates the worker status in the DB."""
     try:
         payload = {
             "worker_id": WORKER_ID,
@@ -43,18 +48,24 @@ def notify_fleet_manager(status: str, error: str = None):
             "User-Agent": f"Hydra-Pull-Worker/{WORKER_ID}"
         }
 
-        register_url = API_URL
-
-        response = requests.post(register_url, json=payload, headers=headers, timeout=15)
+        # We use the provided URL directly as per your requirement
+        response = requests.post(API_URL, json=payload, headers=headers, timeout=15)
 
         if response.status_code not in [200, 202]:
-            logger.error(f"Failed to notify fleet ({status}): {response.status_code} - {response.text}")
+            logger.error(f"LifeCycle: Failed to notify ({status}): {response.status_code}")
         else:
-            logger.info(f"Reported status: {status}")
+            logger.info(f"LifeCycle: Reported {status.upper()}")
 
     except Exception as e:
-        logger.error(f"Error notifying fleet: {e}")
+        logger.error(f"LifeCycle: Error notifying fleet: {e}")
 
+# --- Thread Failure Tracker ---
+def thread_done_callback(future):
+    """Reveals exceptions that happen inside threads."""
+    try:
+        future.result()
+    except Exception as e:
+        logger.critical(f"THREAD-CRASH: A processing thread died! Error: {e}", exc_info=True)
 
 # --- Job Processor ---
 def process_single_job(job_data: dict):
@@ -62,19 +73,26 @@ def process_single_job(job_data: dict):
     headers = {"Authorization": f"Bearer {SECRET}"}
     rid = f"JOB-{job_id[:8]}"
 
-    logger.info(f"Thread-{threading.get_ident()}: Starting job {job_id}")
+    # Rename current thread for better logs
+    threading.current_thread().name = f"Worker-{job_id[:4]}"
+    logger.info(f"Starting job {job_id}")
 
     try:
         # 1. Download
+        logger.info(f"Downloading from GCS: {job_data['input_url'][:50]}...")
         img_resp = requests.get(job_data["input_url"], timeout=45)
         img_resp.raise_for_status()
+        logger.info(f"Download complete: {len(img_resp.content)} bytes")
 
         # 2. Process
+        logger.info(f"Executing AI Pipeline for {rid}...")
         result_bytes, width, height = asyncio.run(
             process_image(img_resp.content, ProcessingOptions(**job_data["options"]), rid)
         )
+        logger.info(f"AI processing finished: {width}x{height}")
 
         # 3. Upload
+        logger.info(f"Uploading result to: {job_data['upload_url'][:50]}...")
         upload_resp = requests.put(
             job_data["upload_url"],
             data=result_bytes,
@@ -84,24 +102,30 @@ def process_single_job(job_data: dict):
         upload_resp.raise_for_status()
 
         # 4. Complete
+        logger.info(f"Reporting SUCCESS for {job_id}")
+        # Note: Added /complete if API_URL is the base, otherwise adjust as needed
         requests.post(f"{API_URL}/complete", json={
             "job_id": job_id, "worker_id": WORKER_ID, "status": "success",
             "meta": {"width": width, "height": height,
                      "upscale_applied": job_data["options"].get("apply_upscale", False)}
         }, headers=headers, timeout=15)
 
-        logger.info(f"Job {job_id} DONE.")
+        logger.info(f"DONE: Job {job_id} finalized.")
 
     except Exception as e:
-        logger.error(f"Job {job_id} FAILED: {e}")
-        requests.post(f"{API_URL}/complete", json={
-            "job_id": job_id, "worker_id": WORKER_ID, "status": "failed", "error": str(e)
-        }, headers=headers, timeout=15)
-
+        logger.error(f"FAILED: Job {job_id} | Error: {e}")
+        try:
+            requests.post(f"{API_URL}/complete", json={
+                "job_id": job_id, "worker_id": WORKER_ID, "status": "failed", "error": str(e)
+            }, headers=headers, timeout=15)
+        except:
+            pass
 
 def main():
+    threading.current_thread().name = "Main-Loop"
     headers = {"Authorization": f"Bearer {SECRET}"}
     error_message = None
+    clean_exit = False
 
     # 1. Report BOOTING
     notify_fleet_manager("booting")
@@ -116,11 +140,9 @@ def main():
         notify_fleet_manager("failed", error=f"Model Init Error: {e}")
         return
 
-    time.sleep(1)
-
     # 3. Report ACTIVE
     notify_fleet_manager("active")
-    logger.info(f"Pull Worker {WORKER_ID} ACTIVE with {MAX_THREADS} threads. Polling...")
+    logger.info(f"Pull Worker {WORKER_ID} ACTIVE with {MAX_THREADS} threads. Polling {API_URL}...")
 
     consecutive_errors = 0
     MAX_RETRIES = 5
@@ -128,6 +150,7 @@ def main():
     with ThreadPoolExecutor(max_workers=MAX_THREADS) as executor:
         while not shutdown_event.is_set():
             try:
+                # Assuming /poll if API_URL is the base
                 resp = requests.post(
                     f"{API_URL}/poll",
                     json={"worker_id": WORKER_ID},
@@ -135,11 +158,10 @@ def main():
                     timeout=30
                 )
 
-                # Reset error counter on success
                 consecutive_errors = 0
 
                 if resp.status_code != 200:
-                    logger.warning(f"Poll non-200: {resp.status_code}")
+                    logger.warning(f"Poll returned {resp.status_code}. Sleeping 5s.")
                     time.sleep(5)
                     continue
 
@@ -147,53 +169,52 @@ def main():
                 command = data.get("command")
 
                 if command == "shutdown":
-                    logger.warning("Shutdown command received.")
+                    logger.warning("Intentional SHUTDOWN command received from backend.")
                     clean_exit = True
                     shutdown_event.set()
                     break
 
                 if command == "process" and data.get("job"):
-                    executor.submit(process_single_job, data["job"])
+                    job = data["job"]
+                    logger.info(f"Dispatched Job: {job['id']}")
+                    future = executor.submit(process_single_job, job)
+                    future.add_done_callback(thread_done_callback)
 
-                # Small breathe
+                # Wait before next poll
                 time.sleep(3)
 
             except requests.exceptions.RequestException as e:
                 consecutive_errors += 1
-                wait_time = min(consecutive_errors * 5, 60)  # Backoff
-                logger.warning(f"Poll Network Error ({consecutive_errors}/{MAX_RETRIES}): {e}. Sleeping {wait_time}s.")
+                wait_time = min(consecutive_errors * 5, 60)
+                logger.warning(f"Network Error ({consecutive_errors}/{MAX_RETRIES}): {e}. Sleeping {wait_time}s.")
 
                 if consecutive_errors > MAX_RETRIES:
-                    error_message = "Max network retries exceeded"
-                    logger.error("Max network retries exceeded. Assuming fatal network loss.")
-                    shutdown_event.set()
+                    error_message = f"Network Loss: {str(e)}"
                     break
                 time.sleep(wait_time)
 
             except Exception as e:
-                logger.critical(f"Unexpected Loop Error: {e}", exc_info=True)
+                logger.critical(f"Critical Loop Error: {e}", exc_info=True)
                 consecutive_errors += 1
                 if consecutive_errors > 3:
-                    error_message = f"Unexpected Error: {e}"
-                    logger.critical("Too many critical errors. Exiting.")
-                    shutdown_event.set()
+                    error_message = f"Unexpected Failure: {str(e)}"
                     break
                 time.sleep(10)
 
-    if not error_message:
-        logger.info("Reporting CLEAN SHUTDOWN to fleet manager.")
+    # 4. Final Cleanup Report
+    if clean_exit:
+        logger.info("Cleaning up for authorized exit...")
         notify_fleet_manager("stopping")
     else:
-        logger.error("Reporting UNEXPECTED FAILURE to fleet manager.")
+        logger.error(f"Cleaning up after error: {error_message}")
         notify_fleet_manager("failed", error=error_message)
 
-    logger.info("Worker process finished.")
+    logger.info("Worker script terminated.")
 
 
 if __name__ == "__main__":
     try:
         main()
     except Exception as e:
-        logger.critical(f"Worker crashed: {e}", exc_info=True)
-        # Try one last gasp to report failure
-        notify_fleet_manager("failed", error=str(e))
+        logger.critical(f"Top-level Crash: {e}", exc_info=True)
+        notify_fleet_manager("failed", error=f"Unhandled Exception: {str(e)}")
