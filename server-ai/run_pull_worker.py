@@ -43,7 +43,7 @@ def notify_fleet_manager(status: str, error: str = None):
             "User-Agent": f"Hydra-Pull-Worker/{WORKER_ID}"
         }
 
-        register_url = f"{API_URL}/internal/worker-register"
+        register_url = API_URL
 
         response = requests.post(register_url, json=payload, headers=headers, timeout=15)
 
@@ -84,7 +84,7 @@ def process_single_job(job_data: dict):
         upload_resp.raise_for_status()
 
         # 4. Complete
-        requests.post(f"{API_URL}/fleet/complete", json={
+        requests.post(f"{API_URL}/complete", json={
             "job_id": job_id, "worker_id": WORKER_ID, "status": "success",
             "meta": {"width": width, "height": height,
                      "upscale_applied": job_data["options"].get("apply_upscale", False)}
@@ -94,7 +94,7 @@ def process_single_job(job_data: dict):
 
     except Exception as e:
         logger.error(f"Job {job_id} FAILED: {e}")
-        requests.post(f"{API_URL}/fleet/complete", json={
+        requests.post(f"{API_URL}/complete", json={
             "job_id": job_id, "worker_id": WORKER_ID, "status": "failed", "error": str(e)
         }, headers=headers, timeout=15)
 
@@ -129,7 +129,7 @@ def main():
         while not shutdown_event.is_set():
             try:
                 resp = requests.post(
-                    f"{API_URL}/fleet/poll",
+                    f"{API_URL}/poll",
                     json={"worker_id": WORKER_ID},
                     headers=headers,
                     timeout=30
