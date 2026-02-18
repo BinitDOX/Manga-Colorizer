@@ -5,6 +5,9 @@ import sys
 import logging
 import asyncio
 import threading
+import random
+import time
+
 from concurrent.futures import ThreadPoolExecutor
 
 sys.path.append(os.getcwd())
@@ -147,7 +150,16 @@ def main():
     consecutive_errors = 0
     MAX_RETRIES = 5
 
+    SLEEP_TIERS = [
+        (5 * 60, (4, 8)),  # < 5 min idle → fast
+        (10 * 60, (8, 14)),  # 5–10 min → medium
+        (20 * 60, (14, 22)),  # 10–20 min → slower
+        (float("inf"), (22, 30))  # 20+ min → capped
+    ]
+
     with ThreadPoolExecutor(max_workers=MAX_THREADS) as executor:
+        last_job_time = time.monotonic()
+
         while not shutdown_event.is_set():
             try:
                 # Assuming /poll if API_URL is the base
@@ -161,8 +173,8 @@ def main():
                 consecutive_errors = 0
 
                 if resp.status_code != 200:
-                    logger.warning(f"Poll returned {resp.status_code}. Sleeping 5s.")
-                    time.sleep(5)
+                    logger.warning(f"Poll returned {resp.status_code}. Sleeping 10s.")
+                    time.sleep(10)
                     continue
 
                 data = resp.json()
@@ -180,8 +192,22 @@ def main():
                     future = executor.submit(process_single_job, job)
                     future.add_done_callback(thread_done_callback)
 
-                # Wait before next poll
-                time.sleep(3)
+                    last_job_time = time.monotonic()
+
+                # --- Adaptive idle sleep ---
+                now = time.monotonic()
+                idle_duration = now - last_job_time
+
+                for threshold, (low, high) in SLEEP_TIERS:
+                    if idle_duration < threshold:
+                        sleep_time = random.uniform(low, high)
+                        break
+
+                logger.debug(
+                    f"Idle {idle_duration:.0f}s → sleeping {sleep_time:.2f}s"
+                )
+
+                time.sleep(sleep_time)
 
             except requests.exceptions.RequestException as e:
                 consecutive_errors += 1
