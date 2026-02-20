@@ -72,7 +72,7 @@ def thread_done_callback(future):
 
 # --- Job Processor ---
 def process_single_job(job_data: dict):
-    job_id = job_data["id"]
+    job_id = job_data["job_id"]
     headers = {"Authorization": f"Bearer {SECRET}"}
     rid = f"JOB-{job_id[:8]}"
 
@@ -188,7 +188,7 @@ def main():
 
                 if command == "process" and data.get("job"):
                     job = data["job"]
-                    logger.info(f"Dispatched Job: {job['id']}")
+                    logger.info(f"Dispatched Job: {job['job_id']}")
                     future = executor.submit(process_single_job, job)
                     future.add_done_callback(thread_done_callback)
 
