@@ -139,6 +139,7 @@ def main():
 
     # --- Polling Tiers (Idle Time -> Sleep Range) ---
     SLEEP_TIERS = [
+        (0.5 * 60, (1, 1)), # < 30 sec idle -> INSTANT (Poll every 1s)
         (1 * 60, (1, 3)),   # < 1 min idle  → SUPER FAST (Burst Mode)
         (5 * 60, (4, 8)),   # 1-5 min idle  → FAST
         (10 * 60, (8, 14)),  # 5-10 min idle → MEDIUM
